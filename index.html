@@ -544,7 +544,7 @@
                     .select('*')
                     .eq('student_id', studentId)
                     .eq('module_id', 'module_1_excel_sharepoint')
-                    .single();
+                    .maybeSingle(); // Changed to maybeSingle to fix 406 error on empty result
                     
                 if (data && data.completed) {
                     console.log("Restoring progress: Module 1 Complete");
