@@ -188,7 +188,7 @@
                         </div>
                         <h3 class="text-xl font-bold text-white mb-2">1. Excel to SharePoint</h3>
                         <p class="text-slate-400 text-sm mb-6 leading-relaxed">The Foundation. Learn to read Excel files, handle basic data cleaning, and use the API to upload lists.</p>
-                        <button onclick="startWorkshop()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-brand-500/20">
+                        <button onclick="startWorkshop()" id="start-module-1-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-brand-500/20">
                             Start Module <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
                         </button>
                     </div>
@@ -527,8 +527,39 @@
                 }
 
                 document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
+                
+                // RESTORE PROGRESS
+                await restoreUserProgress();
             } else {
                 document.getElementById('auth-modal').classList.remove('hidden');
+            }
+        }
+
+        async function restoreUserProgress() {
+            if (!supabaseClient || !studentId) return;
+            
+            try {
+                const { data, error } = await supabaseClient
+                    .from('student_progress')
+                    .select('*')
+                    .eq('student_id', studentId)
+                    .eq('module_id', 'module_1_excel_sharepoint')
+                    .single();
+                    
+                if (data && data.completed) {
+                    console.log("Restoring progress: Module 1 Complete");
+                    // Update Module 1 Card Style
+                    const m1Btn = document.getElementById('start-module-1-btn');
+                    if(m1Btn) {
+                        m1Btn.innerHTML = 'Replay Module <i class="fa-solid fa-rotate-right"></i>';
+                        m1Btn.classList.add('bg-green-600', 'hover:bg-green-500');
+                        m1Btn.classList.remove('bg-brand-600', 'hover:bg-brand-500');
+                    }
+                    // Unlock Module 2 immediately (no animation)
+                    unlockNextMission(true);
+                }
+            } catch (err) {
+                // Ignore errors if no progress found
             }
         }
 
@@ -788,17 +819,19 @@
              location.reload(); 
         }
         
-        function unlockNextMission() {
+        function unlockNextMission(instant = false) {
              const dashboard = document.getElementById('dashboard-container');
              const workshop = document.getElementById('workshop-container');
              
-             workshop.style.opacity = '0';
-             
-             dashboard.style.display = 'flex';
-             void dashboard.offsetWidth;
-             dashboard.style.opacity = '1';
-             dashboard.style.pointerEvents = 'auto';
-             dashboard.classList.remove('fade-exit');
+             // Only perform transition animations if NOT instant (i.e. finished the workshop)
+             if (!instant) {
+                 workshop.style.opacity = '0';
+                 dashboard.style.display = 'flex';
+                 void dashboard.offsetWidth;
+                 dashboard.style.opacity = '1';
+                 dashboard.style.pointerEvents = 'auto';
+                 dashboard.classList.remove('fade-exit');
+             }
 
              // Unlock Module 2 Visuals
              const mod2 = document.getElementById('module-2');
@@ -833,9 +866,11 @@
                  alert("Excellent work! Module 2 is currently under development. Check back later for more challenges.");
              };
 
-             setTimeout(() => {
-                 workshop.classList.add('hidden');
-             }, 700);
+             if (!instant) {
+                 setTimeout(() => {
+                     workshop.classList.add('hidden');
+                 }, 700);
+             }
         }
 
         // Event Listeners
