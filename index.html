@@ -286,7 +286,61 @@
         let studentName = "";
         let isSignUp = true;
 
-        // DYNAMIC CONTENT LOADING
+        // AUTH & INIT
+        document.addEventListener('DOMContentLoaded', () => {
+            if (SUPABASE_URL !== 'INSERT_YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
+                try {
+                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    
+                    // Setup Auth Listener (Preferred Way)
+                    supabaseClient.auth.onAuthStateChange((event, session) => {
+                        console.log("Auth event:", event);
+                        if (session) {
+                            handleSessionFound(session);
+                        } else {
+                            document.getElementById('auth-modal').classList.remove('hidden');
+                        }
+                    });
+
+                } catch (e) {
+                    console.error('Supabase init failed:', e);
+                    loadActivities();
+                }
+            } else {
+                if(localStorage.getItem('mock_session')) {
+                    handleMockSession();
+                }
+                loadActivities();
+            }
+        });
+
+        async function handleSessionFound(session) {
+            studentId = session.user.id;
+            studentName = session.user.user_metadata.full_name || "Student";
+            
+            document.getElementById('auth-modal').classList.add('hidden');
+            document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
+            
+            const badge = document.getElementById('student-badge');
+            if(badge) {
+                badge.innerText = 'Online';
+                badge.classList.remove('hidden', 'text-slate-300', 'border-slate-700');
+                badge.classList.add('bg-green-900/30', 'text-green-400', 'border-green-500/30');
+            }
+            
+            // Reload activities to reflect unlocked status
+            loadActivities();
+        }
+
+        function handleMockSession() {
+            document.getElementById('auth-modal').classList.add('hidden');
+            studentName = "Guest User";
+            document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
+            const sBadge = document.getElementById('student-badge');
+            if(sBadge) { sBadge.innerText = 'Demo Mode'; sBadge.classList.remove('hidden'); }
+        }
+
+        // UI & LOGIC
         async function loadActivities() {
             const grid = document.getElementById('activities-grid');
             if (!grid) return;
@@ -302,6 +356,7 @@
                     try {
                         const { data: progData } = await supabaseClient.from('student_progress').select('module_id').eq('student_id', studentId).eq('completed', true);
                         if(progData) completedModules = progData.map(p => p.module_id);
+                        console.log("Completed Modules:", completedModules);
                     } catch(e) { console.error(e); }
                 }
 
@@ -309,9 +364,7 @@
                 allActivities.forEach((activity, index) => {
                     activity.isCompleted = completedModules.includes(activity.id);
                     let isUnlocked = activity.status === 'unlocked' || index === 0;
-                    if (index > 0 && completedModules.includes(allActivities[index-1].id)) {
-                        isUnlocked = true;
-                    }
+                    if (index > 0 && completedModules.includes(allActivities[index-1].id)) isUnlocked = true;
                     if (activity.status === 'unlocked') isUnlocked = true;
                     if (activity.isCompleted) isUnlocked = true;
 
@@ -321,7 +374,7 @@
 
             } catch (err) {
                 console.error("Error loading activities:", err);
-                grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10"><i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i><p>Unable to load curriculum. Please ensure activities.json is present.</p></div>`;
+                grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10"><i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i><p>Unable to load curriculum.</p></div>`;
             }
         }
 
@@ -341,7 +394,8 @@
                     <p class="text-slate-400 text-xs mb-4">${activity.description}</p>
                     <button onclick="startWorkshop('${activity.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 mt-2 rounded-lg text-sm transition-colors shadow-lg">Replay Module <i class="fa-solid fa-rotate-right"></i></button>
                 `;
-            } else if (activity.type === 'tutor') {
+            } 
+            else if (activity.type === 'tutor') {
                 card.className = baseClass + "border-2 border-brand-500 group hover:border-brand-400 hover:-translate-y-1 shadow-lg shadow-brand-900/20";
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 bg-brand-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider shadow-md">Tutor Mode</div>
@@ -414,6 +468,8 @@
                 document.getElementById('sp-container').style.filter = "grayscale(1)";
                 document.getElementById('sp-placeholder').classList.remove('hidden');
                 document.getElementById('sp-list-items').innerHTML = `<div class="text-center text-slate-400 mt-20" id="sp-placeholder"><p class="mb-2"><i class="fa-solid fa-cloud-arrow-up text-3xl opacity-50"></i></p>List is empty...</div>`;
+                document.getElementById('results-stage').classList.add('hidden');
+                document.getElementById('simulation-stage').classList.remove('hidden', 'fade-exit', 'fade-exit-active');
                 
                 const grid = document.querySelector('.excel-grid');
                 grid.innerHTML = `<div class="excel-header">Product</div><div class="excel-header">Region</div><div class="excel-header">Sales</div>`;
@@ -462,6 +518,7 @@
                 accumulatedLines.push(step.solution); 
                 saveProgress(currentStepIndex + 1);
                 
+                // Visual FX - Generic triggers for visual feedback
                 if(currentStepIndex === 1) { 
                     document.getElementById('excel-container').style.opacity = "0.7";
                     document.getElementById('excel-container').style.filter = "grayscale(0.5)";
@@ -524,26 +581,97 @@
             }, delay + 1000);
         }
 
-        // Init
-        document.addEventListener('DOMContentLoaded', () => {
-            if (SUPABASE_URL !== 'INSERT_YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
-                try {
-                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                    checkSession(); 
-                } catch (e) { console.error('Supabase init failed:', e); loadActivities(); }
+        // --- Auth UI Logic ---
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            const nameField = document.getElementById('name-field');
+            const authTitle = document.getElementById('auth-title');
+            const authSubtitle = document.getElementById('auth-subtitle');
+            const btnText = document.getElementById('auth-btn-text');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            document.getElementById('auth-error').classList.add('hidden');
+            
+            if(isSignUp) {
+                nameField.classList.remove('hidden');
+                authTitle.innerText = "Join the Academy";
+                authSubtitle.innerText = "Create your student profile to track progress.";
+                btnText.innerText = "Start Learning";
+                toggleText.innerText = "Already have an account?";
+                toggleBtn.innerText = "Log in";
             } else {
-                if(localStorage.getItem('mock_session')) {
-                    document.getElementById('auth-modal').classList.add('hidden');
-                    studentName = "Guest User";
-                    const wMsg = document.getElementById('welcome-message');
-                    if(wMsg) wMsg.innerText = `Welcome, ${studentName}.`;
-                    const sBadge = document.getElementById('student-badge');
-                    if(sBadge) { sBadge.innerText = 'Demo Mode'; sBadge.classList.remove('hidden'); }
-                }
-                loadActivities();
+                nameField.classList.add('hidden');
+                authTitle.innerText = "Welcome Back";
+                authSubtitle.innerText = "Log in to continue your progress.";
+                btnText.innerText = "Log In";
+                toggleText.innerText = "New student?";
+                toggleBtn.innerText = "Create account";
             }
-        });
+        }
 
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('student-email').value;
+            const password = document.getElementById('student-password').value;
+            const name = document.getElementById('student-name').value;
+            const errorDiv = document.getElementById('auth-error');
+            const errorMsg = document.getElementById('auth-error-msg');
+            const submitBtn = document.getElementById('auth-submit');
+            
+            errorDiv.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+
+            if (!supabaseClient) {
+                setTimeout(() => {
+                    localStorage.setItem('mock_session', 'true');
+                    handleMockSession();
+                }, 1000);
+                return;
+            }
+
+            try {
+                let error;
+                if (isSignUp) {
+                    const res = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+                    error = res.error;
+                } else {
+                    const res = await supabaseClient.auth.signInWithPassword({ email, password });
+                    error = res.error;
+                }
+                
+                if (error) throw error;
+                // If successful, onAuthStateChange listener handles the UI transition.
+                
+            } catch (err) {
+                errorMsg.innerText = err.message;
+                errorDiv.classList.remove('hidden');
+            } finally {
+                // Reset button state regardless of success/fail
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = isSignUp ? '<span>Start Learning</span> <i class="fa-solid fa-arrow-right"></i>' : '<span>Log In</span> <i class="fa-solid fa-arrow-right"></i>';
+            }
+        }
+
+        async function logout() {
+            if(supabaseClient) { await supabaseClient.auth.signOut(); }
+            localStorage.removeItem('mock_session');
+            location.reload();
+        }
+
+        async function saveProgress(step, completed = false) {
+            if (!supabaseClient || !studentId || !currentActivityId) return;
+            try {
+                await supabaseClient.from('student_progress').upsert({ 
+                    student_id: studentId,
+                    module_id: currentActivityId,
+                    current_step: step,
+                    completed: completed,
+                    updated_at: new Date().toISOString()
+                });
+            } catch (err) {}
+        }
+        
         // Helpers
         function logFeedback(msg, type) {
             const fb = document.getElementById('feedback-msg');
@@ -562,80 +690,23 @@
             const a = document.createElement('a'); a.href = url; a.download = 'automation_script.py';
             document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
         }
-
-        // Auth Logic
-        async function checkSession() {
-            if (!supabaseClient) return;
-            try {
-                const { data: { session } } = await supabaseClient.auth.getSession();
-                if (session) {
-                    const authModal = document.getElementById('auth-modal');
-                    if (authModal) authModal.classList.add('hidden');
-                    
-                    studentId = session.user.id;
-                    studentName = session.user.user_metadata.full_name || "Student";
-                    
-                    const idDisplay = document.getElementById('student-id-display');
-                    if(idDisplay) idDisplay.innerText = `ID: ${studentId.substring(0,8)}...`;
-                    
-                    const badge = document.getElementById('student-badge');
-                    if(badge) {
-                        badge.innerText = 'Online';
-                        badge.classList.remove('hidden', 'text-slate-300', 'border-slate-700');
-                        badge.classList.add('bg-green-900/30', 'text-green-400', 'border-green-500/30');
-                    }
-
-                    const welcomeMsg = document.getElementById('welcome-message');
-                    if(welcomeMsg) welcomeMsg.innerText = `Welcome, ${studentName}.`;
-                    
-                    await restoreUserProgress();
-                } else {
-                    const authModal = document.getElementById('auth-modal');
-                    if (authModal) authModal.classList.remove('hidden');
-                }
-                loadActivities(); 
-            } catch (err) {
-                console.error("Session check error:", err);
-                loadActivities(); 
+        
+        document.getElementById('code-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                e.preventDefault();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
             }
-        }
+        });
 
-        async function restoreUserProgress() {
-            if (!supabaseClient || !studentId) return;
-            try {
-                // Correct ID to match activities.json
-                const { data, error } = await supabaseClient
-                    .from('student_progress')
-                    .select('*')
-                    .eq('student_id', studentId)
-                    .eq('module_id', 'module_1_excel_sharepoint') 
-                    .maybeSingle();
-                    
-                if (data && data.completed) {
-                    unlockNextMission(true);
-                }
-            } catch (err) {}
-        }
+        // Event Listeners
+        const runBtn = document.getElementById('run-btn');
+        const codeInput = document.getElementById('code-input');
+        runBtn.addEventListener('click', runCode);
+        codeInput.addEventListener('keydown', (e) => { if(e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); runCode(); } });
 
-        async function saveProgress(step, completed = false) {
-            if (!supabaseClient || !studentId || !currentActivityId) return;
-            try {
-                await supabaseClient.from('student_progress').upsert({ 
-                    student_id: studentId,
-                    module_id: currentActivityId,
-                    current_step: step,
-                    completed: completed,
-                    updated_at: new Date().toISOString()
-                });
-            } catch (err) {}
-        }
-
-        function toggleAuthMode() {
-            isSignUp = !isSignUp;
-            const nameField = document.getElementById('name-field');
-            const authTitle = document.getElementById('auth-title');
-            const authSubtitle = document.getElementById('auth-subtitle');
-            const btnText = document.getElementById('auth-btn-text');
-            const toggleText = document.getElementById('auth-toggle-text');
-            const toggleBtn = document.getElementById('auth-toggle-btn');
-            document.getElementById('auth-error').
+    </script>
+</body>
+</html>
