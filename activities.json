@@ -1,7 +1,7 @@
 {
   "activities": [
     {
-      "id": "module_1",
+      "id": "module_1_excel_sharepoint",
       "title": "Excel to SharePoint",
       "type": "tutor",
       "description": "The Foundation. Learn to read Excel files, handle basic data cleaning, and use the API to upload lists.",
