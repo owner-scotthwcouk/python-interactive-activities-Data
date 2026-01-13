@@ -292,13 +292,11 @@
             if (!grid) return;
 
             try {
-                // Fetch JSON
                 const response = await fetch('./activities.json');
                 if (!response.ok) throw new Error('Failed to load activities.json');
                 const data = await response.json();
                 allActivities = data.activities;
                 
-                // Fetch user progress
                 let completedModules = [];
                 if(supabaseClient && studentId) {
                     try {
@@ -307,18 +305,15 @@
                     } catch(e) { console.error(e); }
                 }
 
-                // Render Cards
                 grid.innerHTML = '';
                 allActivities.forEach((activity, index) => {
-                    // Check completion
                     activity.isCompleted = completedModules.includes(activity.id);
-
-                    // Unlock logic
                     let isUnlocked = activity.status === 'unlocked' || index === 0;
                     if (index > 0 && completedModules.includes(allActivities[index-1].id)) {
                         isUnlocked = true;
                     }
                     if (activity.status === 'unlocked') isUnlocked = true;
+                    if (activity.isCompleted) isUnlocked = true;
 
                     activity.computedStatus = isUnlocked ? 'unlocked' : 'locked';
                     grid.appendChild(renderCard(activity));
@@ -334,12 +329,8 @@
             const card = document.createElement('div');
             let baseClass = "bg-dark-800 border rounded-xl p-6 relative overflow-hidden transition-all duration-300 ";
             
-            // Logic for COMPLETED state
             if (activity.isCompleted) {
                 card.className = baseClass + "border-green-600/50 group hover:border-green-500 hover:-translate-y-1 shadow-lg shadow-green-900/20";
-                const badgeText = "COMPLETED";
-                const badgeClass = "text-white bg-green-600 border-green-500";
-                
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider shadow-md">Done</div>
                     <div class="flex justify-between items-start mb-4">
@@ -350,9 +341,7 @@
                     <p class="text-slate-400 text-xs mb-4">${activity.description}</p>
                     <button onclick="startWorkshop('${activity.id}')" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-2 mt-2 rounded-lg text-sm transition-colors shadow-lg">Replay Module <i class="fa-solid fa-rotate-right"></i></button>
                 `;
-            } 
-            else if (activity.type === 'tutor') {
-                // Active Tutor (Not completed yet)
+            } else if (activity.type === 'tutor') {
                 card.className = baseClass + "border-2 border-brand-500 group hover:border-brand-400 hover:-translate-y-1 shadow-lg shadow-brand-900/20";
                 card.innerHTML = `
                     <div class="absolute top-0 right-0 bg-brand-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider shadow-md">Tutor Mode</div>
@@ -362,7 +351,6 @@
                     <button onclick="startWorkshop('${activity.id}')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-brand-500/20">Start Module <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></button>
                 `;
             } else {
-                // Standard Module (Locked/Unlocked)
                 const isLocked = activity.computedStatus === 'locked';
                 card.className = baseClass + (isLocked ? "border-slate-700 module-locked" : "border-brand-500 module-unlocked shadow-lg shadow-brand-900/20 group hover:-translate-y-1");
                 const iconBg = isLocked ? "bg-slate-800 text-slate-500" : "bg-brand-900/30 text-brand-400";
@@ -474,7 +462,6 @@
                 accumulatedLines.push(step.solution); 
                 saveProgress(currentStepIndex + 1);
                 
-                // Visual FX
                 if(currentStepIndex === 1) { 
                     document.getElementById('excel-container').style.opacity = "0.7";
                     document.getElementById('excel-container').style.filter = "grayscale(0.5)";
@@ -601,15 +588,33 @@
                     const welcomeMsg = document.getElementById('welcome-message');
                     if(welcomeMsg) welcomeMsg.innerText = `Welcome, ${studentName}.`;
                     
-                    loadActivities(); // Reload to update completion status
+                    await restoreUserProgress();
                 } else {
                     const authModal = document.getElementById('auth-modal');
                     if (authModal) authModal.classList.remove('hidden');
-                    loadActivities(); // Load locked version
                 }
+                loadActivities(); 
             } catch (err) {
                 console.error("Session check error:", err);
+                loadActivities(); 
             }
+        }
+
+        async function restoreUserProgress() {
+            if (!supabaseClient || !studentId) return;
+            try {
+                // Correct ID to match activities.json
+                const { data, error } = await supabaseClient
+                    .from('student_progress')
+                    .select('*')
+                    .eq('student_id', studentId)
+                    .eq('module_id', 'module_1_excel_sharepoint') 
+                    .maybeSingle();
+                    
+                if (data && data.completed) {
+                    unlockNextMission(true);
+                }
+            } catch (err) {}
         }
 
         async function saveProgress(step, completed = false) {
@@ -625,7 +630,6 @@
             } catch (err) {}
         }
 
-        // --- Auth UI Logic ---
         function toggleAuthMode() {
             isSignUp = !isSignUp;
             const nameField = document.getElementById('name-field');
@@ -634,84 +638,4 @@
             const btnText = document.getElementById('auth-btn-text');
             const toggleText = document.getElementById('auth-toggle-text');
             const toggleBtn = document.getElementById('auth-toggle-btn');
-            document.getElementById('auth-error').classList.add('hidden');
-            
-            if(isSignUp) {
-                nameField.classList.remove('hidden');
-                authTitle.innerText = "Join the Academy";
-                authSubtitle.innerText = "Create your student profile to track progress.";
-                btnText.innerText = "Start Learning";
-                toggleText.innerText = "Already have an account?";
-                toggleBtn.innerText = "Log in";
-            } else {
-                nameField.classList.add('hidden');
-                authTitle.innerText = "Welcome Back";
-                authSubtitle.innerText = "Log in to continue your progress.";
-                btnText.innerText = "Log In";
-                toggleText.innerText = "New student?";
-                toggleBtn.innerText = "Create account";
-            }
-        }
-
-        async function handleAuth(e) {
-            e.preventDefault();
-            const email = document.getElementById('student-email').value;
-            const password = document.getElementById('student-password').value;
-            const name = document.getElementById('student-name').value;
-            const errorDiv = document.getElementById('auth-error');
-            const errorMsg = document.getElementById('auth-error-msg');
-            const submitBtn = document.getElementById('auth-submit');
-            
-            errorDiv.classList.add('hidden');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
-
-            if (!supabaseClient) {
-                setTimeout(() => {
-                    localStorage.setItem('mock_session', 'true');
-                    document.getElementById('auth-modal').classList.add('hidden');
-                    const wMsg = document.getElementById('welcome-message');
-                    if(wMsg) wMsg.innerText = `Welcome, ${name || 'Student'}.`;
-                    alert("Mock Login Successful!");
-                    loadActivities();
-                }, 1000);
-                return;
-            }
-
-            try {
-                let error;
-                if (isSignUp) {
-                    const res = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
-                    error = res.error;
-                } else {
-                    const res = await supabaseClient.auth.signInWithPassword({ email, password });
-                    error = res.error;
-                }
-                if (error) throw error;
-                checkSession();
-            } catch (err) {
-                errorMsg.innerText = err.message;
-                errorDiv.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = isSignUp ? '<span>Start Learning</span> <i class="fa-solid fa-arrow-right"></i>' : '<span>Log In</span> <i class="fa-solid fa-arrow-right"></i>';
-            }
-        }
-
-        async function logout() {
-            if(supabaseClient) { await supabaseClient.auth.signOut(); }
-            localStorage.removeItem('mock_session');
-            location.reload();
-        }
-        
-        document.getElementById('code-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-                this.selectionStart = this.selectionEnd = start + 4;
-            }
-        });
-    </script>
-</body>
-</html>
+            document.getElementById('auth-error').
