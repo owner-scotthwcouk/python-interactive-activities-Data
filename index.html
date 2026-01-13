@@ -440,7 +440,8 @@
         };
 
         const SUPABASE_URL = getEnv('SUPABASE_URL', 'https://ubxvjgtjjlowbwcocwtl.supabase.co');
-        const SUPABASE_KEY = getEnv('SUPABASE_KEY', 'sbp_69cdee274b6f8c9c6b3f157d4c3d1595c2c51a40');
+        // REPLACE WITH YOUR ANON KEY
+        const SUPABASE_KEY = getEnv('SUPABASE_KEY', 'sb_publishable_HTYRyfcYI70lXDhvcN7pLA_fJpNs4NM');
 
         // ==========================================
 
@@ -456,6 +457,7 @@
         // Initialize Supabase
         if (SUPABASE_URL !== 'INSERT_YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
             try {
+                // Warning check removed
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 console.log('Supabase initialized');
                 
