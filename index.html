@@ -4,46 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python Automation Academy | Interactive Workshop</title>
-    <meta name="description" content="Learn to automate Excel to SharePoint workflows with Python in this interactive coding lab.">
-    <meta property="og:title" content="Python Automation Academy">
-    <meta property="og:description" content="Interactive Python workshop for data automation.">
-    <meta property="og:image" content="https://supabase.com/badge-animated.svg"> <!-- Placeholder or your logo -->
     
-    <!-- Favicon: Python Snake Emoji -->
+    <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐍</text></svg>">
     
-    <!-- FontAwesome -->
+    <!-- Libraries -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Supabase Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Tailwind CSS (CDN for standalone file usage) -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0ea5e9', // Sky 500
-                            600: '#0284c7', // Sky 600
-                            900: '#0c4a6e', // Sky 900
-                        },
-                        dark: {
-                            800: '#1e293b',
-                            900: '#0f172a',
-                            950: '#020617',
-                        }
+                        brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0ea5e9', 600: '#0284c7', 900: '#0c4a6e' },
+                        dark: { 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['Fira Code', 'monospace'],
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['Fira Code', 'monospace'] }
                 }
             }
         }
@@ -51,44 +31,26 @@
 
     <style>
         body { background-color: #0f172a; color: #e2e8f0; }
-        
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #1e293b; }
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-
+        
         .step-active { border-left: 4px solid #0ea5e9; background-color: #1e293b; }
-        .step-inactive { border-left: 4px solid transparent; opacity: 0.5; }
-        .step-done { border-left: 4px solid #10b981; opacity: 0.7; }
-
-        .excel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #cbd5e1; border: 1px solid #475569; }
-        .excel-cell { background-color: #fff; color: #0f172a; padding: 8px; font-size: 14px; }
-        .excel-header { background-color: #10b981; color: white; font-weight: bold; padding: 8px; font-size: 14px; }
-
-        .sp-list-item { 
-            background: white; 
-            border-left: 4px solid #0ea5e9; 
-            margin-bottom: 8px; 
-            padding: 10px; 
-            border-radius: 4px; 
-            color: #334155; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transform: translateX(20px);
-            opacity: 0;
-            transition: all 0.5s ease-out;
-        }
-        .sp-list-item.visible { transform: translateX(0); opacity: 1; }
-
-        /* Transitions */
         .fade-enter { opacity: 0; transform: translateY(20px); }
         .fade-enter-active { opacity: 1; transform: translateY(0); transition: opacity 500ms, transform 500ms; }
         .fade-exit { opacity: 1; }
         .fade-exit-active { opacity: 0; transition: opacity 300ms; }
 
-        /* Module States */
         .module-locked { opacity: 0.6; pointer-events: none; filter: grayscale(0.8); }
         .module-unlocked { opacity: 1; pointer-events: auto; border-color: #0ea5e9; filter: none; }
+        
+        .excel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background-color: #cbd5e1; border: 1px solid #475569; }
+        .excel-cell { background-color: #fff; color: #0f172a; padding: 8px; font-size: 14px; }
+        .excel-header { background-color: #10b981; color: white; font-weight: bold; padding: 8px; font-size: 14px; }
+        
+        .sp-list-item { background: white; border-left: 4px solid #0ea5e9; margin-bottom: 8px; padding: 10px; border-radius: 4px; color: #334155; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transform: translateX(20px); opacity: 0; transition: all 0.5s ease-out; }
+        .sp-list-item.visible { transform: translateX(0); opacity: 1; }
     </style>
 </head>
 <body class="h-screen flex flex-col overflow-hidden relative font-sans">
@@ -97,7 +59,6 @@
     <div id="auth-modal" class="fixed inset-0 z-[60] bg-slate-900/95 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity duration-500">
         <div class="bg-dark-800 border border-slate-700 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-brand-500 to-green-500"></div>
-            
             <div class="text-center mb-8">
                 <div class="w-16 h-16 bg-brand-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-brand-500/30 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
                     <i class="fa-brands fa-python text-3xl text-brand-500"></i>
@@ -105,30 +66,26 @@
                 <h2 id="auth-title" class="text-2xl font-bold text-white tracking-tight">Join the Academy</h2>
                 <p id="auth-subtitle" class="text-slate-400 text-sm mt-2">Create your student profile to track progress.</p>
             </div>
-
             <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
                 <div id="name-field">
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1 tracking-wider">Student Name</label>
-                    <input type="text" id="student-name" class="w-full bg-dark-900 border border-slate-700 rounded-lg p-3 text-white focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-600" placeholder="e.g. Ada Lovelace">
+                    <input type="text" id="student-name" class="w-full bg-dark-900 border border-slate-700 rounded-lg p-3 text-white focus:border-brand-500 focus:outline-none transition-colors" placeholder="e.g. Ada Lovelace">
                 </div>
                  <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1 tracking-wider">Email Address</label>
-                    <input type="email" id="student-email" required class="w-full bg-dark-900 border border-slate-700 rounded-lg p-3 text-white focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-600" placeholder="student@example.com">
+                    <input type="email" id="student-email" required class="w-full bg-dark-900 border border-slate-700 rounded-lg p-3 text-white focus:border-brand-500 focus:outline-none transition-colors" placeholder="student@example.com">
                 </div>
                  <div>
                     <label class="block text-xs font-bold text-slate-400 uppercase mb-1 tracking-wider">Password</label>
-                    <input type="password" id="student-password" required minlength="6" class="w-full bg-dark-900 border border-slate-700 rounded-lg p-3 text-white focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 transition-all placeholder-slate-600" placeholder="••••••••">
+                    <input type="password" id="student-password" required minlength="6" class="w-full bg-dark-900 border border-slate-700 rounded-lg p-3 text-white focus:border-brand-500 focus:outline-none transition-colors" placeholder="••••••••">
                 </div>
-                
                 <div id="auth-error" class="hidden bg-red-900/30 border border-red-500/50 text-red-200 text-xs p-3 rounded flex items-center gap-2">
                     <i class="fa-solid fa-circle-exclamation"></i> <span id="auth-error-msg">Error message</span>
                 </div>
-
                 <button type="submit" id="auth-submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-brand-500/25">
                     <span id="auth-btn-text">Start Learning</span> <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
-            
             <p class="text-center text-xs text-slate-500 mt-6">
                 <span id="auth-toggle-text">Already have an account?</span> 
                 <button type="button" onclick="toggleAuthMode()" class="text-brand-500 hover:text-brand-400 underline font-bold ml-1 outline-none" id="auth-toggle-btn">Log in</button>
@@ -144,10 +101,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-white text-lg tracking-tight">Python Automation Academy</h1>
-                <p class="text-xs text-slate-400 flex items-center gap-2">
-                    Interactive Coding Lab 
-                    <span id="student-badge" class="hidden bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 border border-slate-700">Guest</span>
-                </p>
+                <p class="text-xs text-slate-400 flex items-center gap-2">Interactive Coding Lab <span id="student-badge" class="hidden bg-slate-800 px-2 py-0.5 rounded text-[10px] text-slate-300 border border-slate-700">Guest</span></p>
             </div>
         </div>
         <div class="flex items-center gap-4">
@@ -169,126 +123,45 @@
     <!-- Main Content -->
     <main class="flex-1 flex overflow-hidden relative bg-dark-900">
         
-        <!-- DASHBOARD -->
+        <!-- DASHBOARD (Dynamic Grid) -->
         <div id="dashboard-container" class="absolute inset-0 z-40 bg-dark-900 flex flex-col p-8 overflow-y-auto transition-opacity duration-500 custom-scrollbar">
             <div class="max-w-6xl mx-auto w-full">
                 <div class="mb-12 text-center">
                     <h2 class="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight" id="welcome-message">Welcome, Student.</h2>
                     <p class="text-slate-400 text-lg">Select a module to begin your automation journey.</p>
                 </div>
-
-                <!-- Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
-                    
-                    <!-- Card 1: Active -->
-                    <div class="bg-dark-800 border-2 border-brand-500 rounded-xl p-6 relative overflow-hidden group hover:border-brand-400 transition-all hover:-translate-y-1 duration-300 shadow-lg shadow-brand-900/20">
-                        <div class="absolute top-0 right-0 bg-brand-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider shadow-md">Tutor Mode</div>
-                        <div class="w-14 h-14 bg-brand-900/30 rounded-xl flex items-center justify-center mb-5 text-brand-400 group-hover:scale-110 transition-transform border border-brand-500/20">
-                            <i class="fa-solid fa-chalkboard-user text-2xl"></i>
-                        </div>
-                        <h3 class="text-xl font-bold text-white mb-2">1. Excel to SharePoint</h3>
-                        <p class="text-slate-400 text-sm mb-6 leading-relaxed">The Foundation. Learn to read Excel files, handle basic data cleaning, and use the API to upload lists.</p>
-                        <button onclick="startWorkshop()" id="start-module-1-btn" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-brand-500/20">
-                            Start Module <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
-                        </button>
+                <!-- Dynamic Grid Container -->
+                <div id="activities-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-10">
+                    <div class="col-span-full text-center text-slate-500 py-10">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3"></i>
+                        <p>Loading curriculum...</p>
                     </div>
-
-                    <!-- Card 2: Filter Logic -->
-                    <div id="module-2" class="bg-dark-800 border border-slate-700 rounded-xl p-6 module-locked transition-all duration-500 relative group">
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 transition-colors" id="module-2-icon">
-                                <i class="fa-solid fa-filter text-lg"></i>
-                            </div>
-                            <i class="fa-solid fa-lock text-slate-600" id="module-2-lock"></i>
-                        </div>
-                        <h3 class="text-slate-300 font-bold text-lg mb-2 transition-colors" id="module-2-title">2. Filter Logic</h3>
-                        <p class="text-slate-500 text-xs mb-4">Upload only rows where Sales > $5000.</p>
-                        <span class="text-xs font-mono text-slate-500 bg-slate-800/50 px-2 py-1 rounded border border-slate-700" id="module-2-badge">Locked</span>
-                        <button class="w-full bg-slate-700 text-slate-400 font-bold py-2 mt-2 rounded-lg text-sm hidden transition-colors" id="module-2-btn">Start Mission</button>
-                    </div>
-
-                    <!-- Other Locked Cards (Visual) -->
-                    <div class="bg-dark-800 border border-slate-700 rounded-xl p-6 module-locked">
-                        <div class="flex justify-between items-start mb-4">
-                             <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500">
-                                <i class="fa-solid fa-calculator text-lg"></i>
-                            </div>
-                            <i class="fa-solid fa-lock text-slate-600"></i>
-                        </div>
-                        <h3 class="text-slate-300 font-bold text-lg mb-2">3. Calculations</h3>
-                        <p class="text-slate-500 text-xs mb-4">Create a new 'Tax' column before upload.</p>
-                         <span class="text-xs font-mono text-slate-500 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">Locked</span>
-                    </div>
-
-                    <div class="bg-dark-800 border border-slate-700 rounded-xl p-6 module-locked">
-                        <div class="flex justify-between items-start mb-4">
-                             <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500">
-                                <i class="fa-solid fa-folder-open text-lg"></i>
-                            </div>
-                            <i class="fa-solid fa-lock text-slate-600"></i>
-                        </div>
-                        <h3 class="text-slate-300 font-bold text-lg mb-2">4. Batch Processing</h3>
-                        <p class="text-slate-500 text-xs mb-4">Loop through 50 Excel files in a folder.</p>
-                         <span class="text-xs font-mono text-slate-500 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">Locked</span>
-                    </div>
-
-                     <div class="bg-dark-800 border border-slate-700 rounded-xl p-6 module-locked">
-                        <div class="flex justify-between items-start mb-4">
-                             <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500">
-                                <i class="fa-solid fa-envelope text-lg"></i>
-                            </div>
-                            <i class="fa-solid fa-lock text-slate-600"></i>
-                        </div>
-                        <h3 class="text-slate-300 font-bold text-lg mb-2">5. Email Alerts</h3>
-                        <p class="text-slate-500 text-xs mb-4">Send Outlook alerts on data errors.</p>
-                         <span class="text-xs font-mono text-slate-500 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">Locked</span>
-                    </div>
-
-                     <div class="bg-dark-800 border border-slate-700 rounded-xl p-6 module-locked">
-                        <div class="flex justify-between items-start mb-4">
-                             <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500">
-                                <i class="fa-solid fa-copy text-lg"></i>
-                            </div>
-                            <i class="fa-solid fa-lock text-slate-600"></i>
-                        </div>
-                        <h3 class="text-slate-300 font-bold text-lg mb-2">6. De-duplication</h3>
-                        <p class="text-slate-500 text-xs mb-4">Check for duplicates (Upsert logic).</p>
-                         <span class="text-xs font-mono text-slate-500 bg-slate-800/50 px-2 py-1 rounded border border-slate-700">Locked</span>
-                    </div>
-
                 </div>
             </div>
         </div>
 
         <!-- WORKSHOP INTERFACE -->
         <div id="workshop-container" class="w-full h-full flex hidden opacity-0 transition-opacity duration-700">
-            
             <!-- Left Panel -->
             <div class="w-1/3 min-w-[350px] flex flex-col border-r border-slate-800 bg-dark-800">
-                
-                <!-- Instructions -->
                 <div id="instructions-panel" class="p-6 overflow-y-auto flex-1 border-b border-slate-800 custom-scrollbar">
                     <div class="mb-4">
-                        <span class="text-brand-500 text-xs font-bold uppercase tracking-wider">Current Mission</span>
-                        <h2 id="step-title" class="text-2xl font-bold text-white mt-1">Initialize System</h2>
+                        <span class="text-brand-500 text-xs font-bold uppercase tracking-wider" id="module-label">Module 1</span>
+                        <h2 id="step-title" class="text-2xl font-bold text-white mt-1">Loading...</h2>
                     </div>
-                    
                     <div class="mb-6">
                         <h3 class="text-slate-200 font-semibold mb-2 text-sm flex items-center"><i class="fa-solid fa-book-open mr-2 text-brand-500"></i>The Concept</h3>
-                        <p id="step-desc" class="text-slate-400 leading-relaxed text-sm">Loading...</p>
+                        <p id="step-desc" class="text-slate-400 leading-relaxed text-sm">...</p>
                     </div>
-
                     <div class="mb-6 bg-dark-900/50 rounded-lg p-4 border border-slate-700">
                         <h3 class="text-slate-200 font-semibold mb-2 text-sm flex items-center"><i class="fa-solid fa-code mr-2 text-purple-400"></i>Syntax Pattern</h3>
                         <div id="step-syntax" class="font-mono text-sm text-purple-300 bg-dark-950 p-2 rounded border border-slate-800 overflow-x-auto">...</div>
                         <p class="text-xs text-slate-500 mt-2">Use this pattern to construct your code.</p>
                     </div>
-                    
                     <div class="bg-dark-800 rounded-lg p-4 border border-brand-900/50 shadow-lg relative overflow-hidden">
                         <div class="absolute top-0 left-0 w-1 h-full bg-brand-500"></div>
                         <p class="text-xs text-brand-400 mb-2 font-bold tracking-wider">YOUR TASK</p>
-                        <p id="step-task" class="text-sm text-white mb-3 font-medium">Loading...</p>
-                        
+                        <p id="step-task" class="text-sm text-white mb-3 font-medium">...</p>
                         <div class="mt-4 pt-3 border-t border-slate-700">
                             <button onclick="toggleSolution()" id="solution-btn" class="text-xs text-slate-500 hover:text-white transition-colors flex items-center gap-2 outline-none">
                                 <i class="fa-solid fa-key"></i> Stuck? Show Solution
@@ -300,8 +173,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Code Editor -->
                 <div class="p-4 bg-dark-950 shrink-0 border-t border-slate-800">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-xs text-slate-500 font-mono flex items-center gap-2"><i class="fa-brands fa-python"></i> main.py</span>
@@ -310,103 +181,62 @@
                         </button>
                     </div>
                     <div class="relative group">
-                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-dark-900 text-slate-600 text-right pr-2 pt-3 text-sm font-mono select-none border-r border-slate-800 leading-6">
-                            1<br>2<br>3<br>4<br>5<br>6
-                        </div>
+                        <div class="absolute left-0 top-0 bottom-0 w-8 bg-dark-900 text-slate-600 text-right pr-2 pt-3 text-sm font-mono select-none border-r border-slate-800 leading-6">1<br>2<br>3<br>4<br>5<br>6</div>
                         <textarea id="code-input" spellcheck="false" class="w-full h-32 bg-dark-950 text-blue-300 p-3 pl-10 rounded border border-slate-700 focus:border-brand-500 focus:outline-none code-font text-sm resize-none leading-6 shadow-inner" placeholder="Type your code here..."></textarea>
                     </div>
                     <div id="feedback-msg" class="h-6 mt-2 text-xs font-mono truncate"></div>
                 </div>
             </div>
 
-            <!-- Visualization Panel -->
+            <!-- Visualization Panel (Generic) -->
             <div class="flex-1 bg-dark-800 p-8 flex flex-col relative overflow-hidden" id="viz-panel">
                 <div class="absolute inset-0 opacity-5 pointer-events-none" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 20px 20px;"></div>
-
-                <!-- Simulation Stage -->
                 <div id="simulation-stage" class="flex gap-8 h-full z-10 transition-opacity duration-500 items-start pt-10">
-                    <!-- Source: Excel -->
                     <div class="w-1/2 flex flex-col transition-all duration-500" id="excel-container" style="opacity: 0.3; filter: grayscale(1);">
                         <div class="flex items-center gap-2 mb-4">
-                            <div class="bg-green-100 p-1.5 rounded">
-                                <i class="fa-solid fa-file-excel text-green-600 text-xl"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-white">Source: Excel</h3>
+                            <div class="bg-green-100 p-1.5 rounded"><i class="fa-solid fa-file-excel text-green-600 text-xl"></i></div>
+                            <h3 class="text-lg font-semibold text-white">Input Data</h3>
                         </div>
                         <div class="bg-white rounded-lg shadow-2xl overflow-hidden flex-1 border-4 border-slate-600 relative min-h-[300px]">
-                            <div id="excel-loading" class="absolute inset-0 bg-slate-100 flex flex-col items-center justify-center z-20 hidden">
-                                <i class="fa-solid fa-circle-notch fa-spin text-green-600 text-3xl mb-3"></i>
-                                <span class="text-slate-600 font-bold text-sm">Reading File...</span>
-                            </div>
-                            <div id="excel-empty" class="absolute inset-0 bg-slate-200 flex flex-col items-center justify-center text-slate-400">
-                                <i class="fa-solid fa-ban text-4xl mb-2 opacity-50"></i>
-                                <span class="font-medium mt-2">No Data Loaded</span>
-                            </div>
-                            <div id="excel-data" class="hidden h-full overflow-y-auto custom-scrollbar">
+                            <div id="excel-data" class="h-full overflow-y-auto custom-scrollbar">
                                 <div class="excel-grid">
-                                    <div class="excel-header">Product</div>
-                                    <div class="excel-header">Region</div>
-                                    <div class="excel-header">Sales</div>
-                                    <!-- JS Rows -->
+                                    <div class="excel-header">Product</div><div class="excel-header">Region</div><div class="excel-header">Sales</div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mt-4 bg-dark-950 p-3 rounded border border-slate-700 font-mono text-xs text-green-400 hidden shadow-inner" id="console-log">
-                            > File loaded successfully<br>
-                            > 5 rows found
-                        </div>
                     </div>
-
-                    <!-- Animation Zone -->
                     <div class="w-16 flex flex-col justify-center items-center relative h-full pt-20">
                         <div id="transfer-arrow" class="w-full h-2 bg-slate-700 rounded-full opacity-0 transition-all duration-500 overflow-hidden">
-                            <div class="h-full bg-brand-500 w-full animate-[pulse_1s_infinite]"></div>
+                            <div class="h-full bg-brand-500 w-full"></div>
                         </div>
                         <i id="lock-icon" class="fa-solid fa-lock text-slate-600 text-2xl absolute bg-dark-800 p-2 rounded-full border border-slate-700"></i>
                     </div>
-
-                    <!-- Dest: SharePoint -->
                     <div class="w-1/2 flex flex-col transition-all duration-500" id="sp-container" style="opacity: 0.3; filter: grayscale(1);">
                         <div class="flex items-center gap-2 mb-4">
-                            <div class="bg-blue-100 p-1.5 rounded">
-                                <i class="fa-brands fa-microsoft text-blue-600 text-xl"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-white">Dest: SharePoint</h3>
+                            <div class="bg-blue-100 p-1.5 rounded"><i class="fa-solid fa-server text-blue-600 text-xl"></i></div>
+                            <h3 class="text-lg font-semibold text-white">Output System</h3>
                         </div>
                         <div class="bg-slate-200 rounded-lg shadow-2xl flex-1 border-4 border-slate-600 p-4 overflow-y-auto relative min-h-[300px] custom-scrollbar">
-                            <div class="absolute top-0 left-0 right-0 bg-brand-600 h-10 flex items-center px-4 shadow-sm z-10">
-                                <span class="text-white text-xs font-bold uppercase tracking-wider">Sales List - All Items</span>
-                            </div>
                             <div class="mt-10 space-y-2 pt-2" id="sp-list-items">
                                 <div class="text-center text-slate-400 mt-20" id="sp-placeholder">
                                     <p class="mb-2"><i class="fa-solid fa-cloud-arrow-up text-3xl opacity-50"></i></p>
-                                    List is empty. Waiting for connection...
+                                    Waiting for logic...
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Results Stage -->
                 <div id="results-stage" class="hidden h-full z-20 flex-col overflow-y-auto custom-scrollbar">
                     <div class="flex items-center justify-between mb-8 pb-4 border-b border-slate-800">
                         <div>
-                             <h2 class="text-3xl font-bold text-white mb-1 flex items-center gap-3">
-                                <i class="fa-solid fa-check-circle text-green-500 text-4xl"></i> Mission Complete
-                            </h2>
-                            <p class="text-slate-400 text-sm ml-12">Module 1 Status: <span class="text-green-400 font-bold bg-green-900/20 px-2 py-0.5 rounded border border-green-900/50">PASSED</span></p>
+                             <h2 class="text-3xl font-bold text-white mb-1 flex items-center gap-3"><i class="fa-solid fa-check-circle text-green-500 text-4xl"></i> Module Complete</h2>
+                            <p class="text-slate-400 text-sm ml-12">Status: <span class="text-green-400 font-bold bg-green-900/20 px-2 py-0.5 rounded border border-green-900/50">PASSED</span></p>
                         </div>
-                       
                         <div class="flex gap-4">
-                             <button onclick="downloadCode()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 border border-slate-700">
-                                <i class="fa-solid fa-download"></i> Save Code
-                            </button>
-                            <button onclick="unlockNextMission()" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 animate-bounce shadow-lg shadow-brand-500/30">
-                                Next Mission <i class="fa-solid fa-arrow-right"></i>
-                            </button>
+                             <button onclick="downloadCode()" class="bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 border border-slate-700"><i class="fa-solid fa-download"></i> Save Code</button>
+                            <button id="next-mission-btn" onclick="goToDashboard()" class="bg-brand-600 hover:bg-brand-500 text-white px-6 py-2 rounded-lg font-bold transition-colors flex items-center gap-2 animate-bounce shadow-lg shadow-brand-500/30">Next Mission <i class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-full pb-20">
                         <div class="flex flex-col">
                             <h3 class="text-slate-400 text-sm font-bold uppercase mb-3 flex items-center gap-2"><i class="fa-brands fa-python"></i> Your Python Script</h3>
@@ -414,28 +244,10 @@
                                 <pre id="final-code-display" class="leading-relaxed"></pre>
                             </div>
                         </div>
-
                         <div class="flex flex-col">
-                            <h3 class="text-slate-400 text-sm font-bold uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-map"></i> Upcoming Challenges</h3>
-                            <div class="bg-dark-800 rounded-lg border border-slate-700 p-6 flex-1 overflow-y-auto custom-scrollbar">
-                                <p class="text-slate-400 text-sm mb-6">Excellent work. You have mastered the basics. The next mission will test your logic skills.</p>
-                                <ul class="space-y-4">
-                                    <li class="flex gap-4 text-sm text-white bg-brand-900/20 p-4 rounded-xl border border-brand-500/30 relative overflow-hidden">
-                                        <div class="absolute left-0 top-0 bottom-0 w-1 bg-brand-500"></div>
-                                        <div class="bg-brand-500 text-white font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-lg">2</div>
-                                        <div>
-                                            <span class="block font-bold text-brand-400 mb-1">Filter Logic</span>
-                                            <span class="text-slate-300 text-xs">Learn to conditionally upload data. Only upload rows where Sales > 5000.</span>
-                                        </div>
-                                    </li>
-                                    <li class="flex gap-4 text-sm text-slate-500 p-4 opacity-75">
-                                        <div class="bg-slate-800 text-slate-600 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-slate-700">3</div>
-                                        <div>
-                                            <span class="block font-bold mb-1">Calculations</span>
-                                            <span class="text-xs">Create a new 'Tax' column before upload.</span>
-                                        </div>
-                                    </li>
-                                </ul>
+                            <h3 class="text-slate-400 text-sm font-bold uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-map"></i> Dashboard</h3>
+                            <div class="bg-dark-800 rounded-lg border border-slate-700 p-6 flex-1 overflow-y-auto custom-scrollbar flex items-center justify-center">
+                                <button onclick="goToDashboard()" class="text-white hover:text-brand-400 underline">Return to Dashboard</button>
                             </div>
                         </div>
                     </div>
@@ -445,124 +257,330 @@
     </main>
 
     <script>
-        // ==========================================
-        // CONFIGURATION & ENVIRONMENT
-        // ==========================================
-        
-        // ENV VAR HANDLING FOR VERCEL
-        const getEnv = (key, fallback) => {
-            // Check for process.env injection by bundlers (if used)
-            if (typeof process !== 'undefined' && process.env && process.env[key]) {
-                return process.env[key];
-            }
-            return fallback;
-        };
-
+        // CONFIG
+        const getEnv = (key, fallback) => (typeof process !== 'undefined' && process.env && process.env[key]) ? process.env[key] : fallback;
         const SUPABASE_URL = getEnv('SUPABASE_URL', 'https://ubxvjgtjjlowbwcocwtl.supabase.co');
-        // REPLACE WITH YOUR ANON KEY
         const SUPABASE_KEY = getEnv('SUPABASE_KEY', 'sb_publishable_HTYRyfcYI70lXDhvcN7pLA_fJpNs4NM');
 
-        // ==========================================
-
-        // State Management
-        let currentStep = 0;
-        const totalSteps = 7; 
+        // State
+        let allActivities = [];
+        let currentActivityId = null;
+        let currentSteps = [];
+        let currentStepIndex = 0;
         let accumulatedLines = [];
         let supabaseClient = null;
         let studentId = null;
         let studentName = "";
-        let isSignUp = true; // Auth Toggle
+        let isSignUp = true;
 
-        // --- Code Editor Improvements ---
-        // Enable Tab Indentation
-        document.getElementById('code-input').addEventListener('keydown', function(e) {
-            if (e.key === 'Tab') {
-                e.preventDefault();
-                const start = this.selectionStart;
-                const end = this.selectionEnd;
-                // Insert 4 spaces
-                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
-                // Move cursor
-                this.selectionStart = this.selectionEnd = start + 4;
+        // DYNAMIC CONTENT LOADING
+        async function loadActivities() {
+            const grid = document.getElementById('activities-grid');
+            if (!grid) return;
+
+            try {
+                // Fetch JSON
+                const response = await fetch('./activities.json');
+                if (!response.ok) throw new Error('Failed to load activities.json');
+                const data = await response.json();
+                allActivities = data.activities;
+                
+                // Fetch user progress to unlock modules
+                let completedModules = [];
+                if(supabaseClient && studentId) {
+                    const { data: progData } = await supabaseClient.from('student_progress').select('module_id').eq('student_id', studentId).eq('completed', true);
+                    if(progData) completedModules = progData.map(p => p.module_id);
+                }
+
+                // Render Cards
+                grid.innerHTML = '';
+                allActivities.forEach((activity, index) => {
+                    // Logic: Module 1 is open. Others open if previous is completed.
+                    let isUnlocked = activity.status === 'unlocked' || index === 0;
+                    if (index > 0 && completedModules.includes(allActivities[index-1].id)) {
+                        isUnlocked = true;
+                    }
+                    // Override with JSON status if strictly set, but prefer progress logic
+                    if (activity.status === 'unlocked') isUnlocked = true;
+
+                    activity.computedStatus = isUnlocked ? 'unlocked' : 'locked';
+                    grid.appendChild(renderCard(activity));
+                });
+
+            } catch (err) {
+                console.error("Error loading activities:", err);
+                grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10"><i class="fa-solid fa-triangle-exclamation text-2xl mb-2"></i><p>Unable to load curriculum. Please ensure activities.json is present.</p></div>`;
+            }
+        }
+
+        function renderCard(activity) {
+            const card = document.createElement('div');
+            let baseClass = "bg-dark-800 border rounded-xl p-6 relative overflow-hidden transition-all duration-300 ";
+            
+            if (activity.type === 'tutor') {
+                card.className = baseClass + "border-2 border-brand-500 group hover:border-brand-400 hover:-translate-y-1 shadow-lg shadow-brand-900/20";
+                card.innerHTML = `
+                    <div class="absolute top-0 right-0 bg-brand-600 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase tracking-wider shadow-md">Tutor Mode</div>
+                    <div class="w-14 h-14 bg-brand-900/30 rounded-xl flex items-center justify-center mb-5 text-brand-400 group-hover:scale-110 transition-transform border border-brand-500/20"><i class="fa-solid ${activity.icon} text-2xl"></i></div>
+                    <h3 class="text-xl font-bold text-white mb-2">${activity.title}</h3>
+                    <p class="text-slate-400 text-sm mb-6 leading-relaxed">${activity.description}</p>
+                    <button onclick="startWorkshop('${activity.id}')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 group-hover:shadow-lg shadow-brand-500/20">Start Module <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i></button>
+                `;
+            } else {
+                const isLocked = activity.computedStatus === 'locked';
+                card.className = baseClass + (isLocked ? "border-slate-700 module-locked" : "border-brand-500 module-unlocked shadow-lg shadow-brand-900/20 group hover:-translate-y-1");
+                const iconBg = isLocked ? "bg-slate-800 text-slate-500" : "bg-brand-900/30 text-brand-400";
+                const titleColor = isLocked ? "text-slate-300" : "text-white";
+                const badgeClass = isLocked ? "text-slate-500 bg-slate-800/50 border-slate-700" : "text-white bg-green-600 border-green-500";
+                const badgeText = isLocked ? "Locked" : "UNLOCKED";
+                
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${iconBg}"><i class="fa-solid ${activity.icon} text-lg"></i></div>
+                        <i class="fa-solid ${isLocked ? 'fa-lock text-slate-600' : 'fa-unlock text-brand-500'}"></i>
+                    </div>
+                    <h3 class="${titleColor} font-bold text-lg mb-2 transition-colors">${activity.title}</h3>
+                    <p class="text-slate-500 text-xs mb-4">${activity.description}</p>
+                    <span class="text-xs font-mono px-2 py-1 rounded border ${badgeClass}">${badgeText}</span>
+                    <button onclick="startWorkshop('${activity.id}')" class="${isLocked ? 'hidden' : ''} w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-2 mt-2 rounded-lg text-sm transition-colors shadow-lg">Start Mission</button>
+                `;
+            }
+            return card;
+        }
+
+        function startWorkshop(moduleId) {
+            // FIND MODULE DATA
+            const module = allActivities.find(a => a.id === moduleId);
+            if (!module) return console.error("Module not found");
+
+            currentActivityId = moduleId;
+            currentSteps = module.steps || [];
+            currentStepIndex = 0;
+            accumulatedLines = [];
+
+            if (currentSteps.length === 0) {
+                alert("This module is under construction.");
+                return;
+            }
+
+            // UI Transition
+            const dashboard = document.getElementById('dashboard-container');
+            const workshop = document.getElementById('workshop-container');
+            const progressContainer = document.getElementById('progress-container');
+            
+            dashboard.classList.add('fade-exit');
+            dashboard.style.opacity = '0';
+            dashboard.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                dashboard.style.display = 'none';
+                workshop.classList.remove('hidden');
+                void workshop.offsetWidth;
+                workshop.style.opacity = '1';
+                progressContainer.style.opacity = '1';
+                
+                // Update Module Label
+                const label = document.getElementById('module-label');
+                if(label) label.innerText = module.title;
+
+                // Load First Step
+                updateStepUI();
+                saveProgress(0, false);
+                
+                // Reset Visuals
+                document.getElementById('excel-container').style.opacity = "0.3";
+                document.getElementById('excel-container').style.filter = "grayscale(1)";
+                document.getElementById('sp-container').style.opacity = "0.3";
+                document.getElementById('sp-container').style.filter = "grayscale(1)";
+                document.getElementById('sp-placeholder').classList.remove('hidden');
+                document.getElementById('sp-list-items').innerHTML = `<div class="text-center text-slate-400 mt-20" id="sp-placeholder"><p class="mb-2"><i class="fa-solid fa-cloud-arrow-up text-3xl opacity-50"></i></p>List is empty...</div>`;
+                
+                // Mock visual data based on module type?
+                const grid = document.querySelector('.excel-grid');
+                grid.innerHTML = `<div class="excel-header">Product</div><div class="excel-header">Region</div><div class="excel-header">Sales</div>`;
+                // Add mock rows
+                const mockRows = [{p:'A',r:'N',s:'5000'}, {p:'B',r:'S',s:'NaN'}, {p:'C',r:'E',s:'7500'}];
+                mockRows.forEach(r => {
+                    grid.innerHTML += `<div class="excel-cell">${r.p}</div><div class="excel-cell">${r.r}</div><div class="excel-cell">${r.s}</div>`;
+                });
+
+            }, 500);
+        }
+
+        function updateStepUI() {
+            if (currentStepIndex >= currentSteps.length) return;
+            const step = currentSteps[currentStepIndex];
+            
+            document.getElementById('step-title').innerHTML = step.title;
+            document.getElementById('step-desc').innerHTML = step.desc;
+            document.getElementById('step-task').innerHTML = step.task;
+            document.getElementById('step-syntax').innerText = step.syntax;
+            document.getElementById('solution-code').innerText = step.solution;
+
+            document.getElementById('solution-box').classList.add('hidden');
+            document.getElementById('code-input').value = "";
+            document.getElementById('code-input').focus();
+            
+            document.getElementById('progress-bar').style.width = `${(currentStepIndex / currentSteps.length) * 100}%`;
+        }
+
+        function validateSubmission(userCode, rules) {
+            if (!rules) return true;
+            if (rules.starts_with && !userCode.trim().startsWith(rules.starts_with)) return false;
+            if (rules.contains) {
+                for (let str of rules.contains) {
+                    if (!userCode.includes(str)) return false;
+                }
+            }
+            return true;
+        }
+
+        function runCode() {
+            const userCode = document.getElementById('code-input').value;
+            const step = currentSteps[currentStepIndex];
+
+            if (validateSubmission(userCode, step.validation_rules)) {
+                logFeedback(step.success_msg || "Code executed successfully.", "success");
+                accumulatedLines.push(step.solution); // Store correct solution for final file
+                saveProgress(currentStepIndex + 1);
+                
+                // Visual triggers based on step index (Generic visual progress)
+                if(currentStepIndex === 1) { // Import
+                    document.getElementById('excel-container').style.opacity = "0.7";
+                    document.getElementById('excel-container').style.filter = "grayscale(0.5)";
+                }
+                if(currentStepIndex === 2) { // Read
+                    document.getElementById('excel-container').style.opacity = "1";
+                    document.getElementById('excel-container').style.filter = "none";
+                    document.getElementById('console-log').classList.remove('hidden');
+                }
+                if(currentStepIndex === 4) { // Connect
+                    document.getElementById('sp-container').style.opacity = "1";
+                    document.getElementById('sp-container').style.filter = "none";
+                    document.getElementById('lock-icon').classList.replace('fa-lock', 'fa-lock-open');
+                    document.getElementById('lock-icon').classList.add('text-green-500');
+                }
+
+                currentStepIndex++;
+                
+                if (currentStepIndex < currentSteps.length) {
+                    setTimeout(() => updateStepUI(), 1500);
+                } else {
+                    // Module Complete
+                    saveProgress(currentSteps.length, true); // Mark completed in DB
+                    setTimeout(() => showCompletionScreen(), 1000);
+                }
+            } else {
+                logFeedback("Syntax Error. Check the Syntax Pattern.", "error");
+                const input = document.getElementById('code-input');
+                input.classList.add('border-red-500');
+                setTimeout(() => input.classList.remove('border-red-500'), 500);
+            }
+        }
+
+        function showCompletionScreen() {
+            const simStage = document.getElementById('simulation-stage');
+            const resStage = document.getElementById('results-stage');
+            
+            // Run final animation first if needed
+            const listContainer = document.getElementById('sp-list-items');
+            document.getElementById('sp-placeholder').classList.add('hidden');
+            document.getElementById('transfer-arrow').classList.remove('opacity-0');
+            document.getElementById('final-code-display').innerText = accumulatedLines.join('\n');
+
+            // Quick Animation loop
+            let delay = 0;
+            [1,2,3].forEach(i => {
+                delay += 500;
+                setTimeout(() => {
+                    listContainer.innerHTML += `<div class="sp-list-item visible"><div class="font-bold text-xs">Item ${i}</div></div>`;
+                }, delay);
+            });
+
+            setTimeout(() => {
+                simStage.classList.add('fade-exit');
+                simStage.classList.add('fade-exit-active');
+                setTimeout(() => {
+                    simStage.classList.add('hidden');
+                    resStage.classList.remove('hidden');
+                    resStage.classList.add('fade-enter');
+                    void resStage.offsetWidth;
+                    resStage.classList.add('fade-enter-active');
+                }, 300);
+            }, delay + 1000);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            if (SUPABASE_URL !== 'INSERT_YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
+                try {
+                    supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    checkSession(); // This will trigger loadActivities after checking auth
+                } catch (e) { console.error('Supabase init failed:', e); loadActivities(); }
+            } else {
+                // Demo Mode
+                if(localStorage.getItem('mock_session')) {
+                    document.getElementById('auth-modal').classList.add('hidden');
+                    studentName = "Guest User";
+                    document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
+                    document.getElementById('student-badge').innerText = 'Demo Mode';
+                    document.getElementById('student-badge').classList.remove('hidden');
+                }
+                loadActivities();
             }
         });
 
-        // --- Supabase Init ---
-        if (SUPABASE_URL !== 'INSERT_YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
-            try {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                console.log('Supabase initialized');
-                checkSession();
-            } catch (e) {
-                console.error('Supabase init failed:', e);
-            }
-        } else {
-             // Mock session fallback for preview without keys
-             if(localStorage.getItem('mock_session')) {
-                document.getElementById('auth-modal').classList.add('hidden');
-                studentName = "Guest User";
-                document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
-                document.getElementById('student-badge').innerText = 'Demo Mode';
-                document.getElementById('student-badge').classList.remove('hidden');
-             }
+        // Helpers
+        function logFeedback(msg, type) {
+            const fb = document.getElementById('feedback-msg');
+            fb.innerText = `> ${msg}`;
+            fb.className = `h-6 mt-2 text-xs font-mono ${type === 'success' ? 'text-green-400' : 'text-red-400'}`;
+        }
+        function toggleSolution() { document.getElementById('solution-box').classList.toggle('hidden'); }
+        function fillSolution() { 
+            document.getElementById('code-input').value = currentSteps[currentStepIndex].solution; 
+            document.getElementById('code-input').focus(); 
+        }
+        function goToDashboard() { location.reload(); }
+        function downloadCode() {
+            const blob = new Blob([accumulatedLines.join('\n')], { type: 'text/x-python' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'automation_script.py';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); window.URL.revokeObjectURL(url);
         }
 
+        // Auth Logic (Same as before)
         async function checkSession() {
             if (!supabaseClient) return;
-
             const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 document.getElementById('auth-modal').classList.add('hidden');
                 studentId = session.user.id;
                 studentName = session.user.user_metadata.full_name || "Student";
-                
-                const idDisplay = document.getElementById('student-id-display');
-                if(idDisplay) idDisplay.innerText = `ID: ${studentId.substring(0,8)}...`;
-                
+                document.getElementById('student-id-display').innerText = `ID: ${studentId.substring(0,8)}...`;
                 const badge = document.getElementById('student-badge');
-                if(badge) {
-                    badge.innerText = 'Online';
-                    badge.classList.remove('hidden', 'text-slate-300', 'border-slate-700');
-                    badge.classList.add('bg-green-900/30', 'text-green-400', 'border-green-500/30');
-                }
-
+                if(badge) { badge.innerText = 'Online'; badge.classList.remove('hidden', 'text-slate-300', 'border-slate-700'); badge.classList.add('bg-green-900/30', 'text-green-400', 'border-green-500/30'); }
                 document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
-                
-                // RESTORE PROGRESS
-                await restoreUserProgress();
             } else {
                 document.getElementById('auth-modal').classList.remove('hidden');
             }
+            loadActivities(); // Load activities AFTER we know who the user is
         }
 
-        async function restoreUserProgress() {
-            if (!supabaseClient || !studentId) return;
-            
+        async function saveProgress(step, completed = false) {
+            if (!supabaseClient || !studentId || !currentActivityId) return;
             try {
-                const { data, error } = await supabaseClient
-                    .from('student_progress')
-                    .select('*')
-                    .eq('student_id', studentId)
-                    .eq('module_id', 'module_1_excel_sharepoint')
-                    .maybeSingle(); // Changed to maybeSingle to fix 406 error on empty result
-                    
-                if (data && data.completed) {
-                    console.log("Restoring progress: Module 1 Complete");
-                    // Update Module 1 Card Style
-                    const m1Btn = document.getElementById('start-module-1-btn');
-                    if(m1Btn) {
-                        m1Btn.innerHTML = 'Replay Module <i class="fa-solid fa-rotate-right"></i>';
-                        m1Btn.classList.add('bg-green-600', 'hover:bg-green-500');
-                        m1Btn.classList.remove('bg-brand-600', 'hover:bg-brand-500');
-                    }
-                    // Unlock Module 2 immediately (no animation)
-                    unlockNextMission(true);
-                }
-            } catch (err) {
-                // Ignore errors if no progress found
-            }
+                await supabaseClient.from('student_progress').upsert({ 
+                    student_id: studentId,
+                    module_id: currentActivityId,
+                    current_step: step,
+                    completed: completed,
+                    updated_at: new Date().toISOString()
+                });
+            } catch (err) {}
         }
 
+        // --- Other Auth Functions (toggleAuthMode, handleAuth, logout) preserved from previous version ---
         function toggleAuthMode() {
             isSignUp = !isSignUp;
             const nameField = document.getElementById('name-field');
@@ -571,9 +589,7 @@
             const btnText = document.getElementById('auth-btn-text');
             const toggleText = document.getElementById('auth-toggle-text');
             const toggleBtn = document.getElementById('auth-toggle-btn');
-            const errorDiv = document.getElementById('auth-error');
-            errorDiv.classList.add('hidden');
-            
+            document.getElementById('auth-error').classList.add('hidden');
             if(isSignUp) {
                 nameField.classList.remove('hidden');
                 authTitle.innerText = "Join the Academy";
@@ -605,444 +621,51 @@
             submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
 
             if (!supabaseClient) {
-                // Mock behavior
                 setTimeout(() => {
                     localStorage.setItem('mock_session', 'true');
                     document.getElementById('auth-modal').classList.add('hidden');
                     document.getElementById('welcome-message').innerText = `Welcome, ${name || 'Student'}.`;
-                    alert("Mock Login Successful! (Connect Supabase keys for real auth)");
+                    alert("Mock Login Successful!");
+                    loadActivities();
                 }, 1000);
                 return;
             }
 
             try {
                 let error;
-                let data;
-
                 if (isSignUp) {
-                    const res = await supabaseClient.auth.signUp({
-                        email: email,
-                        password: password,
-                        options: { data: { full_name: name } }
-                    });
+                    const res = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
                     error = res.error;
-                    data = res.data;
                 } else {
-                    const res = await supabaseClient.auth.signInWithPassword({
-                        email: email,
-                        password: password
-                    });
+                    const res = await supabaseClient.auth.signInWithPassword({ email, password });
                     error = res.error;
-                    data = res.data;
                 }
-
                 if (error) throw error;
                 checkSession();
-
             } catch (err) {
                 errorMsg.innerText = err.message;
                 errorDiv.classList.remove('hidden');
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = isSignUp ? 
-                    '<span>Start Learning</span> <i class="fa-solid fa-arrow-right"></i>' : 
-                    '<span>Log In</span> <i class="fa-solid fa-arrow-right"></i>';
+                submitBtn.innerHTML = isSignUp ? '<span>Start Learning</span> <i class="fa-solid fa-arrow-right"></i>' : '<span>Log In</span> <i class="fa-solid fa-arrow-right"></i>';
             }
         }
 
         async function logout() {
-            if(supabaseClient) {
-                await supabaseClient.auth.signOut();
-                checkSession();
-                location.reload();
-            } else {
-                localStorage.removeItem('mock_session');
-                location.reload();
-            }
-        }
-
-        async function saveProgress(step, completed = false) {
-            if (!supabaseClient || !studentId) {
-                // Fail silently for user, log for dev
-                console.log(`[Mock DB] Saving progress: Step ${step}, Completed: ${completed}`);
-                return;
-            }
-
-            try {
-                const { error } = await supabaseClient
-                    .from('student_progress')
-                    .upsert({ 
-                        student_id: studentId,
-                        module_id: 'module_1_excel_sharepoint',
-                        current_step: step,
-                        completed: completed,
-                        updated_at: new Date().toISOString()
-                    });
-                
-                if (error) console.warn('Sync warning:', error.message);
-            } catch (err) {
-                console.warn('Sync failed:', err);
-            }
+            if(supabaseClient) { await supabaseClient.auth.signOut(); }
+            localStorage.removeItem('mock_session');
+            location.reload();
         }
         
-        // Mock Data
-        const excelData = [
-            { prod: "Widget A", region: "North", sales: "5000" },
-            { prod: "Widget B", region: "South", sales: "NaN" }, 
-            { prod: "Widget C", region: "East", sales: "7500" },
-            { prod: "Widget A", region: "West", sales: "3000" },
-            { prod: "Widget D", region: "North", sales: "1200" }
-        ];
-
-        // Steps Configuration
-        const steps = [
-            {
-                title: "1. Good Habits: Comments",
-                desc: "Before we write code, we should explain it. <br><br>In Python, any line starting with a hash symbol <code>#</code> is a <strong>Comment</strong>. The computer ignores it, but it helps humans understand what the script does.",
-                syntax: "# [Description of script]",
-                task: "Write a comment: '# Import Sales to SharePoint'",
-                solution: "# Import Sales to SharePoint",
-                validate: (input) => input.trim().startsWith("#"),
-                onComplete: () => logFeedback("Great habit! Comments make code readable.", "success")
-            },
-            {
-                title: "2. Import Library",
-                desc: "We need <strong>pandas</strong>, the industry standard for data manipulation. We will give it a short nickname <code>pd</code> so we don't have to type 'pandas' every time we use it.",
-                syntax: "import [library_name] as [alias]",
-                task: "Import the pandas library and give it the alias 'pd'.",
-                solution: "import pandas as pd",
-                validate: (input) => input.toLowerCase().replace(/\s+/g, '').includes("importpandasaspd"),
-                onComplete: () => {
-                    logFeedback("Perfect! 'pd' is now your toolkit.", "success");
-                    document.getElementById('excel-container').style.opacity = "0.7";
-                    document.getElementById('excel-container').style.filter = "grayscale(0.5)";
-                }
-            },
-            {
-                title: "3. Read the Excel File",
-                desc: "We use the <code>read_excel</code> function from our new <code>pd</code> toolkit. We store this result in a variable called <code>df</code> (DataFrame).",
-                syntax: "[variable] = pd.read_excel('[filename]')",
-                task: "Create a variable named 'df' that reads 'sales_data.xlsx'.",
-                solution: "df = pd.read_excel('sales_data.xlsx')",
-                validate: (input) => input.includes("read_excel") && input.includes("sales_data.xlsx") && input.includes("df"),
-                onComplete: () => {
-                    showExcelData(true);
-                    document.getElementById('excel-container').style.opacity = "1";
-                    document.getElementById('excel-container').style.filter = "none";
-                    document.getElementById('console-log').classList.remove('hidden');
-                }
-            },
-            {
-                title: "4. Clean the Data",
-                desc: "Real-world data is messy. Look at Row 2: the Sales value is <strong>NaN</strong> (Not a Number). SharePoint cannot handle NaNs. We use <code>.fillna()</code> to replace them with 0.",
-                syntax: "df = df.fillna([safe_value])",
-                task: "Update 'df' by filling all NaN values with 0.",
-                solution: "df = df.fillna(0)",
-                validate: (input) => input.includes("fillna") && input.includes("0"),
-                onComplete: () => {
-                    cleanExcelData();
-                    logFeedback("Cleaned! NaNs replaced with 0.", "success");
-                }
-            },
-            {
-                title: "5. Connect to SharePoint",
-                desc: "We create a <strong>ClientContext</strong> to open a secure tunnel to SharePoint. This holds your authentication credentials.",
-                syntax: "ctx = ClientContext('[url_string]')",
-                task: "Initialize a context variable 'ctx' with the URL 'https://site.url'.",
-                solution: "ctx = ClientContext('https://site.url')",
-                validate: (input) => input.includes("ClientContext") && input.includes("https://site.url"),
-                onComplete: () => {
-                    document.getElementById('sp-container').style.opacity = "1";
-                    document.getElementById('sp-container').style.filter = "none";
-                    document.getElementById('lock-icon').classList.replace('fa-lock', 'fa-lock-open');
-                    document.getElementById('lock-icon').classList.add('text-green-500');
-                    document.getElementById('lock-icon').classList.remove('text-slate-600');
-                    logFeedback("Tunnel established. Connected to SharePoint.", "success");
-                }
-            },
-            {
-                title: "6. Upload Loop (Start)",
-                desc: "A <strong>for loop</strong> allows us to repeat an action for every item in a collection. We use <code>.iterrows()</code> to grab data row by row.",
-                syntax: "for index, row in df.iterrows():",
-                task: "Write the header of the for loop.",
-                solution: "for index, row in df.iterrows():",
-                validate: (input) => input.includes("for") && input.includes("iterrows"),
-                onComplete: () => logFeedback("Loop started. Now define the action...", "success")
-            },
-            {
-                title: "7. Send Data (Output)",
-                desc: "Inside the loop, we use the <code>add_item</code> command to actually send the data to SharePoint.",
-                syntax: "target_list.add_item([data_variable])",
-                task: "Inside the loop, call add_item using the 'row' variable.",
-                solution: "    target_list.add_item(row)",
-                validate: (input) => input.includes("add_item") && input.includes("row"),
-                onComplete: () => animateUpload()
-            }
-        ];
-
-        // DOM Elements
-        const runBtn = document.getElementById('run-btn');
-        const codeInput = document.getElementById('code-input');
-        const feedbackMsg = document.getElementById('feedback-msg');
-        
-        const titleEl = document.getElementById('step-title');
-        const descEl = document.getElementById('step-desc');
-        const taskEl = document.getElementById('step-task');
-        const syntaxEl = document.getElementById('step-syntax');
-        const solutionBox = document.getElementById('solution-box');
-        const solutionCode = document.getElementById('solution-code');
-        const progressBar = document.getElementById('progress-bar');
-        const finalCodeDisplay = document.getElementById('final-code-display');
-
-        // Logic
-        function startWorkshop() {
-            const dashboard = document.getElementById('dashboard-container');
-            const workshop = document.getElementById('workshop-container');
-            const progressContainer = document.getElementById('progress-container');
-
-            dashboard.classList.add('fade-exit');
-            dashboard.style.opacity = '0';
-            dashboard.style.pointerEvents = 'none';
-
-            setTimeout(() => {
-                dashboard.style.display = 'none';
-                workshop.classList.remove('hidden');
-                void workshop.offsetWidth;
-                workshop.style.opacity = '1';
-                progressContainer.style.opacity = '1';
-                
-                updateStepUI();
-                saveProgress(0, false);
-            }, 500);
-        }
-
-        function goToDashboard() {
-             location.reload(); 
-        }
-        
-        function unlockNextMission(instant = false) {
-             const dashboard = document.getElementById('dashboard-container');
-             const workshop = document.getElementById('workshop-container');
-             
-             // Only perform transition animations if NOT instant (i.e. finished the workshop)
-             if (!instant) {
-                 workshop.style.opacity = '0';
-                 dashboard.style.display = 'flex';
-                 void dashboard.offsetWidth;
-                 dashboard.style.opacity = '1';
-                 dashboard.style.pointerEvents = 'auto';
-                 dashboard.classList.remove('fade-exit');
-             }
-
-             // Unlock Module 2 Visuals
-             const mod2 = document.getElementById('module-2');
-             const mod2Icon = document.getElementById('module-2-icon');
-             const mod2Lock = document.getElementById('module-2-lock');
-             const mod2Title = document.getElementById('module-2-title');
-             const mod2Badge = document.getElementById('module-2-badge');
-             const mod2Btn = document.getElementById('module-2-btn');
-
-             mod2.classList.remove('module-locked');
-             mod2.classList.add('module-unlocked', 'bg-dark-800', 'border-brand-500', 'shadow-lg', 'shadow-brand-900/20');
-             
-             mod2Icon.classList.remove('bg-slate-800', 'text-slate-500');
-             mod2Icon.classList.add('bg-brand-900/30', 'text-brand-400');
-             
-             mod2Lock.classList.remove('fa-lock', 'text-slate-600');
-             mod2Lock.classList.add('fa-unlock', 'text-brand-500');
-             
-             mod2Title.classList.remove('text-slate-300');
-             mod2Title.classList.add('text-white');
-
-             mod2Badge.innerText = "UNLOCKED";
-             mod2Badge.classList.remove('text-slate-500', 'bg-slate-800/50', 'border-slate-700');
-             mod2Badge.classList.add('text-white', 'bg-green-600', 'border-green-500');
-             
-             mod2Btn.classList.remove('hidden', 'bg-slate-700', 'text-slate-400');
-             mod2Btn.classList.add('bg-brand-600', 'hover:bg-brand-500', 'text-white', 'shadow-lg');
-             mod2Btn.innerText = "Start Mission 2";
-
-             // Click Handler for Module 2
-             mod2Btn.onclick = function() {
-                 alert("Excellent work! Module 2 is currently under development. Check back later for more challenges.");
-             };
-
-             if (!instant) {
-                 setTimeout(() => {
-                     workshop.classList.add('hidden');
-                 }, 700);
-             }
-        }
-
-        // Event Listeners
-        runBtn.addEventListener('click', runCode);
-        codeInput.addEventListener('keydown', (e) => {
-            if(e.key === 'Enter' && !e.shiftKey) {
+        // Tab Indent
+        document.getElementById('code-input').addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
                 e.preventDefault();
-                runCode();
+                const start = this.selectionStart;
+                const end = this.selectionEnd;
+                this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                this.selectionStart = this.selectionEnd = start + 4;
             }
         });
-
-        function updateStepUI() {
-            const step = steps[currentStep];
-            
-            titleEl.innerHTML = step.title;
-            descEl.innerHTML = step.desc;
-            taskEl.innerHTML = step.task;
-            syntaxEl.innerHTML = step.syntax;
-            solutionCode.innerText = step.solution;
-
-            solutionBox.classList.add('hidden');
-            codeInput.value = "";
-            codeInput.focus();
-            
-            progressBar.style.width = `${(currentStep / totalSteps) * 100}%`;
-        }
-
-        function toggleSolution() {
-            solutionBox.classList.toggle('hidden');
-        }
-
-        function fillSolution() {
-            const step = steps[currentStep];
-            codeInput.value = step.solution;
-            codeInput.focus();
-        }
-
-        function runCode() {
-            const userCode = codeInput.value;
-            const step = steps[currentStep];
-
-            if (step.validate(userCode)) {
-                logFeedback("Code executed successfully.", "success");
-                accumulatedLines.push(step.solution);
-                saveProgress(currentStep + 1);
-                step.onComplete();
-                
-                currentStep++;
-                if (currentStep < totalSteps) {
-                    setTimeout(() => updateStepUI(), 1500);
-                } else {
-                    saveProgress(totalSteps, true);
-                }
-            } else {
-                logFeedback("Syntax Error. Check the Syntax Pattern above!", "error");
-                codeInput.classList.add('border-red-500');
-                setTimeout(() => codeInput.classList.remove('border-red-500'), 500);
-            }
-        }
-
-        function logFeedback(msg, type) {
-            feedbackMsg.innerText = `> ${msg}`;
-            feedbackMsg.className = `h-6 mt-2 text-xs font-mono ${type === 'success' ? 'text-green-400' : 'text-red-400'}`;
-        }
-
-        function downloadCode() {
-            const codeContent = accumulatedLines.join('\n');
-            const blob = new Blob([codeContent], { type: 'text/x-python' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'automation_script.py';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }
-
-        // --- Visual Logic ---
-        function showExcelData(hasError) {
-            const loader = document.getElementById('excel-loading');
-            const empty = document.getElementById('excel-empty');
-            const dataDiv = document.getElementById('excel-data');
-            const grid = dataDiv.querySelector('.excel-grid');
-
-            loader.classList.remove('hidden');
-            empty.classList.add('hidden');
-
-            setTimeout(() => {
-                loader.classList.add('hidden');
-                dataDiv.classList.remove('hidden');
-
-                while(grid.children.length > 3) { grid.removeChild(grid.lastChild); }
-
-                excelData.forEach(row => {
-                    const c1 = document.createElement('div'); c1.className = 'excel-cell font-mono'; c1.innerText = row.prod;
-                    const c2 = document.createElement('div'); c2.className = 'excel-cell font-mono'; c2.innerText = row.region;
-                    const c3 = document.createElement('div'); c3.className = `excel-cell font-mono ${row.sales === 'NaN' ? 'text-red-500 font-bold bg-red-50' : ''}`; 
-                    c3.innerText = row.sales;
-                    grid.append(c1, c2, c3);
-                });
-            }, 800);
-        }
-
-        function cleanExcelData() {
-            const cells = document.querySelectorAll('.excel-cell');
-            cells.forEach(cell => {
-                if (cell.innerText === 'NaN') {
-                    cell.innerText = '0';
-                    cell.className = 'excel-cell font-mono text-green-600 font-bold bg-green-50 transition-all duration-1000';
-                }
-            });
-        }
-
-        function animateUpload() {
-            const listContainer = document.getElementById('sp-list-items');
-            document.getElementById('sp-placeholder').classList.add('hidden');
-            document.getElementById('transfer-arrow').classList.remove('opacity-0');
-            finalCodeDisplay.innerText = accumulatedLines.join('\n');
-
-            let delay = 0;
-            excelData.forEach((row, index) => {
-                delay += 800;
-                setTimeout(() => {
-                    const item = document.createElement('div');
-                    item.className = 'sp-list-item flex justify-between items-center';
-                    item.innerHTML = `
-                        <div>
-                            <div class="font-bold text-sm">${row.prod}</div>
-                            <div class="text-xs text-slate-500">Region: ${row.region}</div>
-                        </div>
-                        <div class="text-blue-600 font-mono font-bold">$${row.sales === 'NaN' ? '0' : row.sales}</div>
-                    `;
-                    listContainer.appendChild(item);
-                    void item.offsetWidth;
-                    item.classList.add('visible');
-
-                    const grid = document.querySelector('.excel-grid');
-                    const startIdx = (index * 3) + 3;
-                    
-                    // Simple highlighting logic
-                    if(grid.children[startIdx]) {
-                        grid.children[startIdx].style.backgroundColor = '#e0f2fe';
-                        if(grid.children[startIdx+1]) grid.children[startIdx+1].style.backgroundColor = '#e0f2fe';
-                        if(grid.children[startIdx+2]) grid.children[startIdx+2].style.backgroundColor = '#e0f2fe';
-                        
-                        setTimeout(() => {
-                            if(grid.children[startIdx]) grid.children[startIdx].style.backgroundColor = 'white';
-                            if(grid.children[startIdx+1]) grid.children[startIdx+1].style.backgroundColor = 'white';
-                            if(grid.children[startIdx+2]) grid.children[startIdx+2].style.backgroundColor = 'white';
-                        }, 400);
-                    }
-
-                }, delay);
-            });
-
-            setTimeout(() => {
-                const simStage = document.getElementById('simulation-stage');
-                const resStage = document.getElementById('results-stage');
-                
-                simStage.classList.add('fade-exit');
-                simStage.classList.add('fade-exit-active');
-                
-                setTimeout(() => {
-                    simStage.classList.add('hidden');
-                    resStage.classList.remove('hidden');
-                    resStage.classList.add('fade-enter');
-                    void resStage.offsetWidth;
-                    resStage.classList.add('fade-enter-active');
-                }, 300);
-            }, delay + 1200);
-        }
     </script>
 </body>
 </html>
