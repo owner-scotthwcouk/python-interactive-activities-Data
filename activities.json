@@ -1,0 +1,818 @@
+{
+  "activities": [
+    {
+      "id": "module_1",
+      "title": "Excel to SharePoint",
+      "type": "tutor",
+      "description": "The Foundation. Learn to read Excel files, handle basic data cleaning, and use the API to upload lists.",
+      "status": "unlocked",
+      "icon": "fa-chalkboard-user",
+      "difficulty": "Beginner",
+      "steps": [
+        {
+          "title": "1. Good Habits: Comments",
+          "desc": "Before we write code, we should explain it. In Python, any line starting with a hash symbol <code>#</code> is a **Comment**.",
+          "syntax": "# [Description]",
+          "task": "Write a comment: '# Import Sales to SharePoint'",
+          "solution": "# Import Sales to SharePoint",
+          "validation_rules": { "starts_with": "#" },
+          "success_msg": "Great habit! Comments make code readable."
+        },
+        {
+          "title": "2. Import Library",
+          "desc": "We need **pandas** for data manipulation. Give it the nickname `pd`.",
+          "syntax": "import [library] as [alias]",
+          "task": "Import pandas as pd.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import", "pandas", "pd"] },
+          "success_msg": "Library imported."
+        },
+        {
+          "title": "3. Read the Excel File",
+          "desc": "Load 'sales_data.xlsx' into a variable called `df`.",
+          "syntax": "df = pd.read_excel('[filename]')",
+          "task": "Read the Excel file.",
+          "solution": "df = pd.read_excel('sales_data.xlsx')",
+          "validation_rules": { "contains": ["read_excel", "sales_data.xlsx"] },
+          "success_msg": "File loaded."
+        },
+        {
+          "title": "4. Clean the Data",
+          "desc": "SharePoint hates empty cells (NaN). Replace them with 0.",
+          "syntax": "df = df.fillna([value])",
+          "task": "Fill NaN values with 0.",
+          "solution": "df = df.fillna(0)",
+          "validation_rules": { "contains": ["fillna", "0"] },
+          "success_msg": "Data cleaned."
+        },
+        {
+          "title": "5. Connect to SharePoint",
+          "desc": "Initialize the secure connection using `ClientContext`.",
+          "syntax": "ctx = ClientContext('[url]')",
+          "task": "Connect to 'https://site.url'.",
+          "solution": "ctx = ClientContext('https://site.url')",
+          "validation_rules": { "contains": ["ClientContext", "https://site.url"] },
+          "success_msg": "Connected securely."
+        },
+        {
+          "title": "6. Upload Loop (Start)",
+          "desc": "Start a loop to iterate through every row in the DataFrame.",
+          "syntax": "for index, row in df.iterrows():",
+          "task": "Write the loop header.",
+          "solution": "for index, row in df.iterrows():",
+          "validation_rules": { "contains": ["for", "index", "row", "iterrows"] },
+          "success_msg": "Loop started."
+        },
+        {
+          "title": "7. Send Data (Output)",
+          "desc": "Inside the loop, send the data using `target_list.add_item`.",
+          "syntax": "    target_list.add_item(row)",
+          "task": "Add the item (check indentation).",
+          "solution": "    target_list.add_item(row)",
+          "validation_rules": { "contains": ["add_item", "row"] },
+          "success_msg": "Pipeline Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_2",
+      "title": "Filter Logic",
+      "type": "challenge",
+      "description": "Learn to conditionally upload data. Only upload rows where Sales > 5000.",
+      "status": "locked",
+      "icon": "fa-filter",
+      "difficulty": "Beginner",
+      "steps": [
+        {
+          "title": "1. Import Library",
+          "desc": "Start by importing pandas to handle our data.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas as pd.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import", "pandas"] },
+          "success_msg": "Ready to start."
+        },
+        {
+          "title": "2. Load Data",
+          "desc": "Read the source file 'sales_data.xlsx'.",
+          "syntax": "df = pd.read_excel('file.xlsx')",
+          "task": "Load 'sales_data.xlsx' into `df`.",
+          "solution": "df = pd.read_excel('sales_data.xlsx')",
+          "validation_rules": { "contains": ["read_excel"] },
+          "success_msg": "Data loaded."
+        },
+        {
+          "title": "3. Inspect Data",
+          "desc": "It's good practice to check the first few rows.",
+          "syntax": "print(df.head())",
+          "task": "Print the head of the dataframe.",
+          "solution": "print(df.head())",
+          "validation_rules": { "contains": ["print", "head"] },
+          "success_msg": "Data looks good."
+        },
+        {
+          "title": "4. Define Threshold",
+          "desc": "Set a variable for our filter limit.",
+          "syntax": "limit = 5000",
+          "task": "Create a variable `limit` set to 5000.",
+          "solution": "limit = 5000",
+          "validation_rules": { "contains": ["limit", "5000"] },
+          "success_msg": "Threshold defined."
+        },
+        {
+          "title": "5. Apply Filter",
+          "desc": "Create a new DataFrame `high_sales` with only rows > limit.",
+          "syntax": "new_df = df[df['Column'] > value]",
+          "task": "Filter `df` where 'Sales' > `limit`.",
+          "solution": "high_sales = df[df['Sales'] > limit]",
+          "validation_rules": { "contains": ["high_sales", ">", "limit"] },
+          "success_msg": "Filter applied."
+        },
+        {
+          "title": "6. Start Loop",
+          "desc": "Iterate through the *filtered* data, not the original.",
+          "syntax": "for index, row in high_sales.iterrows():",
+          "task": "Loop through `high_sales`.",
+          "solution": "for index, row in high_sales.iterrows():",
+          "validation_rules": { "contains": ["for", "high_sales", "iterrows"] },
+          "success_msg": "Looping filtered data."
+        },
+        {
+          "title": "7. Upload Item",
+          "desc": "Upload the row to the list.",
+          "syntax": "    target_list.add_item(row)",
+          "task": "Call add_item with `row`.",
+          "solution": "    target_list.add_item(row)",
+          "validation_rules": { "contains": ["add_item"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_3",
+      "title": "Calculations",
+      "type": "challenge",
+      "description": "Create a new 'Tax' column that calculates 10% of Sales before uploading.",
+      "status": "locked",
+      "icon": "fa-calculator",
+      "difficulty": "Intermediate",
+      "steps": [
+        {
+          "title": "1. Import Pandas",
+          "desc": "As always, we need pandas.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas as pd.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import"] },
+          "success_msg": "Imported."
+        },
+        {
+          "title": "2. Load Data",
+          "desc": "Read the sales data.",
+          "syntax": "df = pd.read_excel('sales_data.xlsx')",
+          "task": "Read 'sales_data.xlsx' into df.",
+          "solution": "df = pd.read_excel('sales_data.xlsx')",
+          "validation_rules": { "contains": ["read_excel"] },
+          "success_msg": "Loaded."
+        },
+        {
+          "title": "3. Clean NaNs",
+          "desc": "Math with NaNs causes errors. Fill them first.",
+          "syntax": "df = df.fillna(0)",
+          "task": "Fill NaNs with 0.",
+          "solution": "df = df.fillna(0)",
+          "validation_rules": { "contains": ["fillna", "0"] },
+          "success_msg": "Safe for math."
+        },
+        {
+          "title": "4. Define Tax Rate",
+          "desc": "Set the tax rate to 10% (0.10).",
+          "syntax": "rate = 0.10",
+          "task": "Set `rate` to 0.10.",
+          "solution": "rate = 0.10",
+          "validation_rules": { "contains": ["rate", "0.10"] },
+          "success_msg": "Rate set."
+        },
+        {
+          "title": "5. Calculate Tax",
+          "desc": "Create a new column 'Tax' by multiplying Sales by rate.",
+          "syntax": "df['New'] = df['Old'] * var",
+          "task": "Calculate `df['Tax']`.",
+          "solution": "df['Tax'] = df['Sales'] * rate",
+          "validation_rules": { "contains": ["Tax", "Sales", "*"] },
+          "success_msg": "Tax column created."
+        },
+        {
+          "title": "6. Calculate Total",
+          "desc": "Create 'Total' by adding Sales and Tax.",
+          "syntax": "df['Total'] = df['A'] + df['B']",
+          "task": "Calculate `df['Total']`.",
+          "solution": "df['Total'] = df['Sales'] + df['Tax']",
+          "validation_rules": { "contains": ["Total", "+"] },
+          "success_msg": "Totals calculated."
+        },
+        {
+          "title": "7. Verify Math",
+          "desc": "Print the first few rows to check our math.",
+          "syntax": "print(df.head())",
+          "task": "Print the head of df.",
+          "solution": "print(df.head())",
+          "validation_rules": { "contains": ["print", "head"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_4",
+      "title": "Batch Processing",
+      "type": "challenge",
+      "description": "Write a loop to process every Excel file in a folder.",
+      "status": "locked",
+      "icon": "fa-folder-open",
+      "difficulty": "Intermediate",
+      "steps": [
+        {
+          "title": "1. Import OS",
+          "desc": "We need the `os` library to navigate folders.",
+          "syntax": "import os",
+          "task": "Import the os library.",
+          "solution": "import os",
+          "validation_rules": { "contains": ["import", "os"] },
+          "success_msg": "OS loaded."
+        },
+        {
+          "title": "2. Import Pandas",
+          "desc": "Don't forget pandas.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas as pd.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import", "pandas"] },
+          "success_msg": "Pandas loaded."
+        },
+        {
+          "title": "3. Define Folder",
+          "desc": "Set the folder path variable.",
+          "syntax": "folder = './monthly_reports'",
+          "task": "Set `folder` to './monthly_reports'.",
+          "solution": "folder = './monthly_reports'",
+          "validation_rules": { "contains": ["folder", "monthly_reports"] },
+          "success_msg": "Path set."
+        },
+        {
+          "title": "4. List Files",
+          "desc": "Get a list of all files in that folder.",
+          "syntax": "files = os.listdir(folder)",
+          "task": "Use `os.listdir` to populate `files`.",
+          "solution": "files = os.listdir(folder)",
+          "validation_rules": { "contains": ["listdir"] },
+          "success_msg": "Files found."
+        },
+        {
+          "title": "5. Start File Loop",
+          "desc": "Loop through every file.",
+          "syntax": "for file in files:",
+          "task": "Start the loop using `file`.",
+          "solution": "for file in files:",
+          "validation_rules": { "contains": ["for", "file", "in"] },
+          "success_msg": "Loop active."
+        },
+        {
+          "title": "6. Check Extension",
+          "desc": "Only process .xlsx files.",
+          "syntax": "    if file.endswith('.xlsx'):",
+          "task": "Check if file ends with .xlsx.",
+          "solution": "    if file.endswith('.xlsx'):",
+          "validation_rules": { "contains": ["if", "endswith", "xlsx"] },
+          "success_msg": "Extension filter active."
+        },
+        {
+          "title": "7. Process File",
+          "desc": "Read the file (indented twice!).",
+          "syntax": "        df = pd.read_excel(file)",
+          "task": "Read the file into df.",
+          "solution": "        df = pd.read_excel(file)",
+          "validation_rules": { "contains": ["read_excel"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_5",
+      "title": "Email Alerts",
+      "type": "challenge",
+      "description": "Add logic to send an email alert if a 'NaN' value is found.",
+      "status": "locked",
+      "icon": "fa-envelope",
+      "difficulty": "Intermediate",
+      "steps": [
+        {
+          "title": "1. Import Library",
+          "desc": "Load pandas.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas as pd.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import", "pandas"] },
+          "success_msg": "Loaded."
+        },
+        {
+          "title": "2. Load Data",
+          "desc": "Load 'critical_data.xlsx'.",
+          "syntax": "df = pd.read_excel('critical_data.xlsx')",
+          "task": "Read the Excel file.",
+          "solution": "df = pd.read_excel('critical_data.xlsx')",
+          "validation_rules": { "contains": ["read_excel"] },
+          "success_msg": "Data loaded."
+        },
+        {
+          "title": "3. Check for Nulls",
+          "desc": "Check if any value in the DataFrame is missing.",
+          "syntax": "has_errors = df.isnull().values.any()",
+          "task": "Set `has_errors` using `df.isnull().values.any()`.",
+          "solution": "has_errors = df.isnull().values.any()",
+          "validation_rules": { "contains": ["isnull", "any"] },
+          "success_msg": "Check logic ready."
+        },
+        {
+          "title": "4. Conditional Block",
+          "desc": "Start an if statement based on the error check.",
+          "syntax": "if has_errors:",
+          "task": "Write the if statement.",
+          "solution": "if has_errors:",
+          "validation_rules": { "contains": ["if", "has_errors"] },
+          "success_msg": "Logic gate set."
+        },
+        {
+          "title": "5. Define Recipient",
+          "desc": "Set the admin email variable.",
+          "syntax": "    admin = 'boss@company.com'",
+          "task": "Set `admin` email inside the if block.",
+          "solution": "    admin = 'boss@company.com'",
+          "validation_rules": { "contains": ["admin", "@"] },
+          "success_msg": "Recipient set."
+        },
+        {
+          "title": "6. Define Message",
+          "desc": "Write the error message.",
+          "syntax": "    msg = 'Data contains NaNs'",
+          "task": "Set the `msg` variable.",
+          "solution": "    msg = 'Data contains NaNs'",
+          "validation_rules": { "contains": ["msg", "="] },
+          "success_msg": "Message drafted."
+        },
+        {
+          "title": "7. Send Alert",
+          "desc": "Call the mock send function.",
+          "syntax": "    send_email(admin, msg)",
+          "task": "Call `send_email` with admin and msg.",
+          "solution": "    send_email(admin, msg)",
+          "validation_rules": { "contains": ["send_email"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_6",
+      "title": "De-duplication",
+      "type": "challenge",
+      "description": "Check if an item exists in SharePoint before adding it (Upsert logic).",
+      "status": "locked",
+      "icon": "fa-copy",
+      "difficulty": "Advanced",
+      "steps": [
+        {
+          "title": "1. Setup Loop",
+          "desc": "We assume `df` is loaded. Start the loop.",
+          "syntax": "for index, row in df.iterrows():",
+          "task": "Start the row loop.",
+          "solution": "for index, row in df.iterrows():",
+          "validation_rules": { "contains": ["for", "iterrows"] },
+          "success_msg": "Loop started."
+        },
+        {
+          "title": "2. Get Product ID",
+          "desc": "Extract the ID to check against.",
+          "syntax": "    pid = row['Product_ID']",
+          "task": "Get 'Product_ID' from the row.",
+          "solution": "    pid = row['Product_ID']",
+          "validation_rules": { "contains": ["pid", "Product_ID"] },
+          "success_msg": "ID extracted."
+        },
+        {
+          "title": "3. Query SharePoint",
+          "desc": "Check if this ID exists.",
+          "syntax": "    exists = list.get_items_by_title(pid)",
+          "task": "Call `get_items_by_title` with `pid`.",
+          "solution": "    exists = list.get_items_by_title(pid)",
+          "validation_rules": { "contains": ["get_items_by_title"] },
+          "success_msg": "Query sent."
+        },
+        {
+          "title": "4. Check Result",
+          "desc": "If `exists` is empty, it's a new item.",
+          "syntax": "    if not exists:",
+          "task": "Check if `exists` is false/empty.",
+          "solution": "    if not exists:",
+          "validation_rules": { "contains": ["if", "not"] },
+          "success_msg": "Logic check."
+        },
+        {
+          "title": "5. Add Item",
+          "desc": "It's new, so add it.",
+          "syntax": "        list.add_item(row)",
+          "task": "Add the item (double indent).",
+          "solution": "        list.add_item(row)",
+          "validation_rules": { "contains": ["add_item"] },
+          "success_msg": "Item added."
+        },
+        {
+          "title": "6. Handle Duplicate",
+          "desc": "What if it DOES exist? Use `else`.",
+          "syntax": "    else:",
+          "task": "Write the else statement.",
+          "solution": "    else:",
+          "validation_rules": { "contains": ["else:"] },
+          "success_msg": "Handling duplicate."
+        },
+        {
+          "title": "7. Log Duplicate",
+          "desc": "Print a message skipping the upload.",
+          "syntax": "        print(f'Skipping {pid}')",
+          "task": "Print a skip message.",
+          "solution": "        print(f'Skipping {pid}')",
+          "validation_rules": { "contains": ["print", "Skipping"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_7",
+      "title": "Export to CSV",
+      "type": "challenge",
+      "description": "Instead of SharePoint, convert the cleaned Excel data into a CSV file.",
+      "status": "locked",
+      "icon": "fa-file-csv",
+      "difficulty": "Beginner",
+      "steps": [
+        {
+          "title": "1. Import",
+          "desc": "Import the standard library.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import", "pandas"] },
+          "success_msg": "Imported."
+        },
+        {
+          "title": "2. Read Excel",
+          "desc": "Load the raw data.",
+          "syntax": "df = pd.read_excel('raw_data.xlsx')",
+          "task": "Read 'raw_data.xlsx'.",
+          "solution": "df = pd.read_excel('raw_data.xlsx')",
+          "validation_rules": { "contains": ["read_excel"] },
+          "success_msg": "Read complete."
+        },
+        {
+          "title": "3. Clean Data",
+          "desc": "Remove bad rows.",
+          "syntax": "df = df.dropna()",
+          "task": "Drop rows with missing values (`dropna`).",
+          "solution": "df = df.dropna()",
+          "validation_rules": { "contains": ["dropna"] },
+          "success_msg": "Cleaned."
+        },
+        {
+          "title": "4. Rename Columns",
+          "desc": "Rename 'Sold' to 'Quantity'.",
+          "syntax": "df = df.rename(columns={'Old': 'New'})",
+          "task": "Rename 'Sold' to 'Quantity'.",
+          "solution": "df = df.rename(columns={'Sold': 'Quantity'})",
+          "validation_rules": { "contains": ["rename", "Sold", "Quantity"] },
+          "success_msg": "Renamed."
+        },
+        {
+          "title": "5. Define Output",
+          "desc": "Set the output filename.",
+          "syntax": "outfile = 'cleaned_data.csv'",
+          "task": "Set `outfile` to 'cleaned_data.csv'.",
+          "solution": "outfile = 'cleaned_data.csv'",
+          "validation_rules": { "contains": ["cleaned_data.csv"] },
+          "success_msg": "Filename set."
+        },
+        {
+          "title": "6. Export",
+          "desc": "Write to CSV. Use `index=False` to hide row numbers.",
+          "syntax": "df.to_csv(outfile, index=False)",
+          "task": "Export using `to_csv`.",
+          "solution": "df.to_csv(outfile, index=False)",
+          "validation_rules": { "contains": ["to_csv", "index=False"] },
+          "success_msg": "File exported."
+        },
+        {
+          "title": "7. Verify",
+          "desc": "Confirm the file creation.",
+          "syntax": "print('Export successful')",
+          "task": "Print a success message.",
+          "solution": "print('Export successful')",
+          "validation_rules": { "contains": ["print"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_8",
+      "title": "Data Merge",
+      "type": "challenge",
+      "description": "Combine data from 'Sales 2023' and 'Sales 2024' sheets into one master list.",
+      "status": "locked",
+      "icon": "fa-layer-group",
+      "difficulty": "Intermediate",
+      "steps": [
+        {
+          "title": "1. Import",
+          "desc": "Get pandas ready.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import"] },
+          "success_msg": "Ready."
+        },
+        {
+          "title": "2. Load 2023",
+          "desc": "Read the first sheet.",
+          "syntax": "df1 = pd.read_excel('data.xlsx', sheet_name='2023')",
+          "task": "Load sheet '2023' into `df1`.",
+          "solution": "df1 = pd.read_excel('data.xlsx', sheet_name='2023')",
+          "validation_rules": { "contains": ["df1", "sheet_name", "2023"] },
+          "success_msg": "2023 loaded."
+        },
+        {
+          "title": "3. Load 2024",
+          "desc": "Read the second sheet.",
+          "syntax": "df2 = pd.read_excel('data.xlsx', sheet_name='2024')",
+          "task": "Load sheet '2024' into `df2`.",
+          "solution": "df2 = pd.read_excel('data.xlsx', sheet_name='2024')",
+          "validation_rules": { "contains": ["df2", "sheet_name", "2024"] },
+          "success_msg": "2024 loaded."
+        },
+        {
+          "title": "4. Add Year Tag",
+          "desc": "Label the data so we know the source.",
+          "syntax": "df1['Year'] = 2023",
+          "task": "Add column 'Year' = 2023 to `df1`.",
+          "solution": "df1['Year'] = 2023",
+          "validation_rules": { "contains": ["df1", "Year", "2023"] },
+          "success_msg": "Tagged df1."
+        },
+        {
+          "title": "5. Tag Second Set",
+          "desc": "Label the second dataset.",
+          "syntax": "df2['Year'] = 2024",
+          "task": "Add column 'Year' = 2024 to `df2`.",
+          "solution": "df2['Year'] = 2024",
+          "validation_rules": { "contains": ["df2", "Year", "2024"] },
+          "success_msg": "Tagged df2."
+        },
+        {
+          "title": "6. Merge Data",
+          "desc": "Concatenate them into one list.",
+          "syntax": "master = pd.concat([df1, df2])",
+          "task": "Concat `df1` and `df2` into `master`.",
+          "solution": "master = pd.concat([df1, df2])",
+          "validation_rules": { "contains": ["concat", "df1", "df2"] },
+          "success_msg": "Merged."
+        },
+        {
+          "title": "7. Export Master",
+          "desc": "Save the combined result.",
+          "syntax": "master.to_excel('master_sales.xlsx')",
+          "task": "Save `master` to Excel.",
+          "solution": "master.to_excel('master_sales.xlsx')",
+          "validation_rules": { "contains": ["to_excel", "master"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_9",
+      "title": "Error Logging",
+      "type": "challenge",
+      "description": "Write any failed uploads to a local 'errors.txt' log file.",
+      "status": "locked",
+      "icon": "fa-triangle-exclamation",
+      "difficulty": "Intermediate",
+      "steps": [
+        {
+          "title": "1. Open Log",
+          "desc": "Open a file in 'append' mode.",
+          "syntax": "log_file = open('errors.txt', 'a')",
+          "task": "Open 'errors.txt' as `log_file`.",
+          "solution": "log_file = open('errors.txt', 'a')",
+          "validation_rules": { "contains": ["open", "a"] },
+          "success_msg": "Log opened."
+        },
+        {
+          "title": "2. Start Loop",
+          "desc": "Iterate data (assume df exists).",
+          "syntax": "for i, row in df.iterrows():",
+          "task": "Start the loop.",
+          "solution": "for i, row in df.iterrows():",
+          "validation_rules": { "contains": ["for", "iterrows"] },
+          "success_msg": "Looping."
+        },
+        {
+          "title": "3. Try Block",
+          "desc": "We want to attempt the upload safely.",
+          "syntax": "    try:",
+          "task": "Start a `try:` block.",
+          "solution": "    try:",
+          "validation_rules": { "contains": ["try:"] },
+          "success_msg": "Safety on."
+        },
+        {
+          "title": "4. Attempt Upload",
+          "desc": "The risky operation.",
+          "syntax": "        target_list.add_item(row)",
+          "task": "Call add_item inside the try block.",
+          "solution": "        target_list.add_item(row)",
+          "validation_rules": { "contains": ["add_item"] },
+          "success_msg": "Attempting..."
+        },
+        {
+          "title": "5. Catch Error",
+          "desc": "What happens if it fails?",
+          "syntax": "    except Exception as e:",
+          "task": "Start the `except` block catching `e`.",
+          "solution": "    except Exception as e:",
+          "validation_rules": { "contains": ["except", "Exception"] },
+          "success_msg": "Error caught."
+        },
+        {
+          "title": "6. Write Log",
+          "desc": "Record the error message to the file.",
+          "syntax": "        log_file.write(str(e) + '\\n')",
+          "task": "Write the error `e` to log_file.",
+          "solution": "        log_file.write(str(e) + '\\n')",
+          "validation_rules": { "contains": ["write", "str(e)"] },
+          "success_msg": "Error logged."
+        },
+        {
+          "title": "7. Close Log",
+          "desc": "Always close files when done (outside loop).",
+          "syntax": "log_file.close()",
+          "task": "Close the log file.",
+          "solution": "log_file.close()",
+          "validation_rules": { "contains": ["close()"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_10",
+      "title": "SQL Connect",
+      "type": "challenge",
+      "description": "Read source data from a SQL database instead of an Excel file.",
+      "status": "locked",
+      "icon": "fa-database",
+      "difficulty": "Advanced",
+      "steps": [
+        {
+          "title": "1. Import SQLite",
+          "desc": "We'll use the standard `sqlite3` library.",
+          "syntax": "import sqlite3",
+          "task": "Import sqlite3.",
+          "solution": "import sqlite3",
+          "validation_rules": { "contains": ["import", "sqlite3"] },
+          "success_msg": "Library loaded."
+        },
+        {
+          "title": "2. Import Pandas",
+          "desc": "Pandas can read directly from SQL.",
+          "syntax": "import pandas as pd",
+          "task": "Import pandas.",
+          "solution": "import pandas as pd",
+          "validation_rules": { "contains": ["import", "pandas"] },
+          "success_msg": "Pandas ready."
+        },
+        {
+          "title": "3. Connect DB",
+          "desc": "Establish a connection to the database file.",
+          "syntax": "conn = sqlite3.connect('company.db')",
+          "task": "Connect to 'company.db'.",
+          "solution": "conn = sqlite3.connect('company.db')",
+          "validation_rules": { "contains": ["connect", "company.db"] },
+          "success_msg": "Connected."
+        },
+        {
+          "title": "4. Write Query",
+          "desc": "Select all active customers.",
+          "syntax": "query = \"SELECT * FROM customers WHERE active = 1\"",
+          "task": "Write a SELECT query for active customers.",
+          "solution": "query = \"SELECT * FROM customers WHERE active = 1\"",
+          "validation_rules": { "contains": ["SELECT", "FROM", "WHERE"] },
+          "success_msg": "Query written."
+        },
+        {
+          "title": "5. Fetch Data",
+          "desc": "Use pandas to execute the query.",
+          "syntax": "df = pd.read_sql(query, conn)",
+          "task": "Read SQL into `df`.",
+          "solution": "df = pd.read_sql(query, conn)",
+          "validation_rules": { "contains": ["read_sql", "query", "conn"] },
+          "success_msg": "Data fetched."
+        },
+        {
+          "title": "6. Close DB",
+          "desc": "Close the database connection to free resources.",
+          "syntax": "conn.close()",
+          "task": "Close the connection.",
+          "solution": "conn.close()",
+          "validation_rules": { "contains": ["close"] },
+          "success_msg": "Connection closed."
+        },
+        {
+          "title": "7. Inspect",
+          "desc": "Verify the data loaded correctly.",
+          "syntax": "print(df.info())",
+          "task": "Print `df.info()`.",
+          "solution": "print(df.info())",
+          "validation_rules": { "contains": ["print", "info"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    },
+    {
+      "id": "module_11",
+      "title": "Web Scraping",
+      "type": "challenge",
+      "description": "Scrape competitor prices from a website and upload to SharePoint.",
+      "status": "locked",
+      "icon": "fa-spider",
+      "difficulty": "Advanced",
+      "steps": [
+        {
+          "title": "1. Import Requests",
+          "desc": "We need `requests` to fetch web pages.",
+          "syntax": "import requests",
+          "task": "Import requests.",
+          "solution": "import requests",
+          "validation_rules": { "contains": ["import", "requests"] },
+          "success_msg": "Requests loaded."
+        },
+        {
+          "title": "2. Import BS4",
+          "desc": "BeautifulSoup parses the HTML.",
+          "syntax": "from bs4 import BeautifulSoup",
+          "task": "Import BeautifulSoup from bs4.",
+          "solution": "from bs4 import BeautifulSoup",
+          "validation_rules": { "contains": ["from", "bs4", "BeautifulSoup"] },
+          "success_msg": "Parser loaded."
+        },
+        {
+          "title": "3. Define URL",
+          "desc": "The site we want to scrape.",
+          "syntax": "url = 'https://competitor.com/prices'",
+          "task": "Set the `url` variable.",
+          "solution": "url = 'https://competitor.com/prices'",
+          "validation_rules": { "contains": ["url", "http"] },
+          "success_msg": "Target locked."
+        },
+        {
+          "title": "4. Fetch Page",
+          "desc": "Get the page content.",
+          "syntax": "page = requests.get(url)",
+          "task": "Get the URL and store in `page`.",
+          "solution": "page = requests.get(url)",
+          "validation_rules": { "contains": ["requests.get"] },
+          "success_msg": "Page fetched."
+        },
+        {
+          "title": "5. Parse HTML",
+          "desc": "Convert text to soup object.",
+          "syntax": "soup = BeautifulSoup(page.text, 'html.parser')",
+          "task": "Create the soup object.",
+          "solution": "soup = BeautifulSoup(page.text, 'html.parser')",
+          "validation_rules": { "contains": ["BeautifulSoup", "page.text"] },
+          "success_msg": "HTML parsed."
+        },
+        {
+          "title": "6. Find Price",
+          "desc": "Find the element with class 'price'.",
+          "syntax": "price = soup.find('div', class_='price').text",
+          "task": "Extract text from div with class 'price'.",
+          "solution": "price = soup.find('div', class_='price').text",
+          "validation_rules": { "contains": ["find", "price"] },
+          "success_msg": "Price found."
+        },
+        {
+          "title": "7. Print Result",
+          "desc": "Display the scraped data.",
+          "syntax": "print(f'Current Price: {price}')",
+          "task": "Print the price.",
+          "solution": "print(f'Current Price: {price}')",
+          "validation_rules": { "contains": ["print", "price"] },
+          "success_msg": "Module Complete!"
+        }
+      ]
+    }
+  ]
+}
