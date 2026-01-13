@@ -427,17 +427,20 @@
         // CONFIGURATION & ENVIRONMENT
         // ==========================================
         
-        // Simulating how a production app reads .env files using process.env
-        // In a real bundler (Vite/Webpack), these values come from your .env file
-        const process = {
-            env: {
-                const SUPABASE_URL = getEnv('SUPABASE_URL', 'SUPABASE_URL=postgresql://postgres:[ArturMillwood01!]@db.ubxvjgtjjlowbwcocwtl.supabase.co:5432/postgres');
-                const SUPABASE_KEY = getEnv('SUPABASE_KEY', 'SUPABASE_KEY=sbp_69cdee274b6f8c9c6b3f157d4c3d1595c2c51a40');
+        // NOTE: For a static HTML file deployed to Vercel, environment variables are NOT 
+        // automatically injected into the browser. 
+        // OPTION 1: Paste your keys directly below (The Anon Key is public-safe).
+        // OPTION 2: Use a bundler (Vite/Webpack) which will replace 'process.env' variables.
+
+        const getEnv = (key, fallback) => {
+            if (typeof process !== 'undefined' && process.env && process.env[key]) {
+                return process.env[key];
             }
+            return fallback;
         };
 
-        const SUPABASE_URL = process.env.SUPABASE_URL;
-        const SUPABASE_KEY = process.env.SUPABASE_KEY;
+        const SUPABASE_URL = getEnv('SUPABASE_URL', 'https://ubxvjgtjjlowbwcocwtl.supabase.co');
+        const SUPABASE_KEY = getEnv('SUPABASE_KEY', 'sbp_69cdee274b6f8c9c6b3f157d4c3d1595c2c51a40');
 
         // ==========================================
 
@@ -993,5 +996,3 @@
     </script>
 </body>
 </html>
-
-
