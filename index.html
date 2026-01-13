@@ -61,7 +61,49 @@
         .module-unlocked { opacity: 1; pointer-events: auto; border-color: #3b82f6; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
+<body class="h-screen flex flex-col overflow-hidden relative">
+
+    <!-- AUTH MODAL (Added) -->
+    <div id="auth-modal" class="fixed inset-0 z-[60] bg-slate-900 flex items-center justify-center p-4 transition-opacity duration-500">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-8 max-w-md w-full shadow-2xl relative overflow-hidden">
+            <!-- Decoration -->
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-green-500"></div>
+            
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
+                    <i class="fa-brands fa-python text-3xl text-blue-400"></i>
+                </div>
+                <h2 id="auth-title" class="text-2xl font-bold text-white">Join the Academy</h2>
+                <p id="auth-subtitle" class="text-slate-400 text-sm mt-2">Create your student profile to save progress.</p>
+            </div>
+
+            <form id="auth-form" class="space-y-4" onsubmit="handleAuth(event)">
+                <div id="name-field">
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Student Name</label>
+                    <input type="text" id="student-name" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none transition-colors" placeholder="e.g. Ada Lovelace">
+                </div>
+                 <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Email Address</label>
+                    <input type="email" id="student-email" required class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none transition-colors" placeholder="student@example.com">
+                </div>
+                 <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Password</label>
+                    <input type="password" id="student-password" required minlength="6" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:outline-none transition-colors" placeholder="••••••••">
+                </div>
+                
+                <div id="auth-error" class="hidden bg-red-900/50 border border-red-500/50 text-red-200 text-xs p-3 rounded"></div>
+
+                <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition-all flex items-center justify-center gap-2 mt-6 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span id="auth-btn-text">Start Learning</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+            
+            <p class="text-center text-xs text-slate-500 mt-6">
+                <span id="auth-toggle-text">Already have an account?</span> 
+                <button type="button" onclick="toggleAuthMode()" class="text-blue-400 hover:text-blue-300 underline font-bold ml-1" id="auth-toggle-btn">Log in</button>
+            </p>
+        </div>
+    </div>
 
     <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-700 p-4 flex justify-between items-center shrink-0 z-50 relative">
@@ -75,6 +117,9 @@
             </div>
         </div>
         <div class="flex items-center gap-6">
+             <button onclick="logout()" class="text-xs text-red-400 hover:text-red-300 transition-colors flex items-center gap-2 border border-red-900/30 px-3 py-1 rounded hover:bg-red-900/20">
+                <i class="fa-solid fa-sign-out-alt"></i> Logout
+            </button>
              <button onclick="goToDashboard()" class="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-2 border border-slate-700 px-3 py-1 rounded hover:bg-slate-800">
                 <i class="fa-solid fa-house"></i> Dashboard
             </button>
@@ -94,7 +139,7 @@
         <div id="dashboard-container" class="absolute inset-0 z-40 bg-slate-900 flex flex-col p-8 overflow-y-auto transition-opacity duration-500">
             <div class="max-w-6xl mx-auto w-full">
                 <div class="mb-10 text-center">
-                    <h2 class="text-4xl font-bold text-white mb-3">Welcome, Student.</h2>
+                    <h2 class="text-4xl font-bold text-white mb-3" id="welcome-message">Welcome, Student.</h2>
                     <p class="text-slate-400 text-lg">Select a module to begin your automation journey.</p>
                 </div>
 
@@ -401,28 +446,151 @@
         const totalSteps = 7; 
         let accumulatedLines = [];
         let supabaseClient = null;
-        let studentId = localStorage.getItem('python_workshop_student_id');
-
-        // Initialize Student ID if not present
-        if (!studentId) {
-            studentId = 'student_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('python_workshop_student_id', studentId);
-        }
-        document.getElementById('student-id-display').innerText = `ID: ${studentId}`;
+        let studentId = null;
+        let studentName = "";
+        let isSignUp = true; // Auth Toggle
 
         // Initialize Supabase
         if (SUPABASE_URL !== 'INSERT_YOUR_SUPABASE_URL' && typeof supabase !== 'undefined') {
             try {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
                 console.log('Supabase initialized');
+                
+                // Check Session on Load
+                checkSession();
+
             } catch (e) {
                 console.error('Supabase init failed:', e);
+            }
+        } else {
+             // Mock session for preview if no DB configured
+             if(localStorage.getItem('mock_session')) {
+                document.getElementById('auth-modal').classList.add('hidden');
+                studentName = "Guest User";
+                document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
+             }
+        }
+
+        async function checkSession() {
+            if (!supabaseClient) return;
+
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session) {
+                // User is logged in
+                document.getElementById('auth-modal').classList.add('hidden');
+                studentId = session.user.id;
+                studentName = session.user.user_metadata.full_name || "Student";
+                document.getElementById('student-id-display').innerText = `ID: ${studentId.substring(0,8)}...`;
+                document.getElementById('welcome-message').innerText = `Welcome, ${studentName}.`;
+            } else {
+                // User is not logged in
+                document.getElementById('auth-modal').classList.remove('hidden');
+            }
+        }
+
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            const nameField = document.getElementById('name-field');
+            const authTitle = document.getElementById('auth-title');
+            const authSubtitle = document.getElementById('auth-subtitle');
+            const btnText = document.getElementById('auth-btn-text');
+            const toggleText = document.getElementById('auth-toggle-text');
+            const toggleBtn = document.getElementById('auth-toggle-btn');
+            
+            if(isSignUp) {
+                nameField.classList.remove('hidden');
+                authTitle.innerText = "Join the Academy";
+                authSubtitle.innerText = "Create your student profile to save progress.";
+                btnText.innerText = "Start Learning";
+                toggleText.innerText = "Already have an account?";
+                toggleBtn.innerText = "Log in";
+            } else {
+                nameField.classList.add('hidden');
+                authTitle.innerText = "Welcome Back";
+                authSubtitle.innerText = "Log in to continue your progress.";
+                btnText.innerText = "Log In";
+                toggleText.innerText = "New student?";
+                toggleBtn.innerText = "Create account";
+            }
+        }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('student-email').value;
+            const password = document.getElementById('student-password').value;
+            const name = document.getElementById('student-name').value;
+            const errorDiv = document.getElementById('auth-error');
+            const submitBtn = document.getElementById('auth-submit');
+            
+            errorDiv.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Processing...';
+
+            if (!supabaseClient) {
+                // Mock behavior for demo
+                setTimeout(() => {
+                    localStorage.setItem('mock_session', 'true');
+                    document.getElementById('auth-modal').classList.add('hidden');
+                    document.getElementById('welcome-message').innerText = `Welcome, ${name || 'Student'}.`;
+                    alert("Mock Login Successful! (Connect Supabase to make this real)");
+                }, 1000);
+                return;
+            }
+
+            try {
+                let error;
+                let data;
+
+                if (isSignUp) {
+                    // SIGN UP
+                    const res = await supabaseClient.auth.signUp({
+                        email: email,
+                        password: password,
+                        options: {
+                            data: { full_name: name }
+                        }
+                    });
+                    error = res.error;
+                    data = res.data;
+                } else {
+                    // LOGIN
+                    const res = await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+                    error = res.error;
+                    data = res.data;
+                }
+
+                if (error) throw error;
+
+                // Success
+                checkSession();
+
+            } catch (err) {
+                errorDiv.innerText = err.message;
+                errorDiv.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = isSignUp ? 
+                    '<span>Start Learning</span> <i class="fa-solid fa-arrow-right"></i>' : 
+                    '<span>Log In</span> <i class="fa-solid fa-arrow-right"></i>';
+            }
+        }
+
+        async function logout() {
+            if(supabaseClient) {
+                await supabaseClient.auth.signOut();
+                checkSession();
+                location.reload();
+            } else {
+                localStorage.removeItem('mock_session');
+                location.reload();
             }
         }
 
         async function saveProgress(step, completed = false) {
-            if (!supabaseClient) {
-                console.log(`[Mock DB] Saving progress for ${studentId}: Step ${step}, Completed: ${completed}`);
+            if (!supabaseClient || !studentId) {
+                console.log(`[Mock DB] Saving progress: Step ${step}, Completed: ${completed}`);
                 return;
             }
 
@@ -430,7 +598,7 @@
                 const { error } = await supabaseClient
                     .from('student_progress')
                     .upsert({ 
-                        student_id: studentId,
+                        student_id: studentId, // Uses UUID from Auth
                         module_id: 'module_1_excel_sharepoint',
                         current_step: step,
                         completed: completed,
@@ -584,7 +752,6 @@
 
         function goToDashboard() {
              location.reload(); 
-             // Note: In a real app we'd just hide/show divs, but reload clears state for the 'next' experience
         }
         
         function unlockNextMission() {
