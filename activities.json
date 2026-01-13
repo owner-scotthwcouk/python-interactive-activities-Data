@@ -11,7 +11,7 @@
       "steps": [
         {
           "title": "1. Good Habits: Comments",
-          "desc": "Before we write code, we should explain it. In Python, any line starting with a hash symbol <code>#</code> is a **Comment**.",
+          "desc": "Before we write code, we should explain it. In Python, any line starting with a hash symbol <code>#</code> is a <strong>Comment</strong>.",
           "syntax": "# [Description]",
           "task": "Write a comment: '# Import Sales to SharePoint'",
           "solution": "# Import Sales to SharePoint",
@@ -20,7 +20,7 @@
         },
         {
           "title": "2. Import Library",
-          "desc": "We need **pandas** for data manipulation. Give it the nickname `pd`.",
+          "desc": "We need <strong>pandas</strong> for data manipulation. Give it the nickname `pd`.",
           "syntax": "import [library] as [alias]",
           "task": "Import pandas as pd.",
           "solution": "import pandas as pd",
@@ -130,7 +130,7 @@
         },
         {
           "title": "6. Start Loop",
-          "desc": "Iterate through the *filtered* data, not the original.",
+          "desc": "Iterate through the <em>filtered</em> data, not the original.",
           "syntax": "for index, row in high_sales.iterrows():",
           "task": "Loop through `high_sales`.",
           "solution": "for index, row in high_sales.iterrows():",
@@ -400,9 +400,9 @@
         {
           "title": "3. Query SharePoint",
           "desc": "Check if this ID exists.",
-          "syntax": "    exists = list.get_items_by_title(pid)",
+          "syntax": "    exists = target_list.get_items_by_title(pid)",
           "task": "Call `get_items_by_title` with `pid`.",
-          "solution": "    exists = list.get_items_by_title(pid)",
+          "solution": "    exists = target_list.get_items_by_title(pid)",
           "validation_rules": { "contains": ["get_items_by_title"] },
           "success_msg": "Query sent."
         },
@@ -418,9 +418,9 @@
         {
           "title": "5. Add Item",
           "desc": "It's new, so add it.",
-          "syntax": "        list.add_item(row)",
+          "syntax": "        target_list.add_item(row)",
           "task": "Add the item (double indent).",
-          "solution": "        list.add_item(row)",
+          "solution": "        target_list.add_item(row)",
           "validation_rules": { "contains": ["add_item"] },
           "success_msg": "Item added."
         },
